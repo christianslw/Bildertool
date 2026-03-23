@@ -12,6 +12,12 @@
  * ========================================================================= */
 const DEFAULT_SUGGESTIONS = ['Vodafone', 'Telekom', 'O2', '1&1', 'Wartung', 'Umbau', 'Demontage'];
 const DEFAULT_CONFIG_FILE_NAME = 'bildertool-config.json';
+const DEFAULT_CATEGORY_COLORS = [
+    '#ef4444', '#f97316', '#f59e0b', '#eab308',
+    '#22c55e', '#10b981', '#14b8a6', '#06b6d4',
+    '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899'
+];
+const DEFAULT_CUSTOM_CATEGORY_COLOR = '#64748b';
 const DEFAULT_CATEGORIES = [
     { id: "Mast", label: "Mast", subcats: ["Pandunen", "Fundament", "Antennen", "Flugwarnbefeuerung", "Steigweg", "Kabel"] },
     { id: "Kabine", label: "Kabine", subcats: ["Keller", "Sendersaal", "Dach"] },
@@ -27,6 +33,37 @@ function normalizeSuggestions(rawSuggestions) {
     return [...new Set(cleaned)];
 }
 
+function normalizeHexColor(rawColor) {
+    const trimmed = String(rawColor || '').trim();
+    if (!trimmed) return '';
+    const shortMatch = trimmed.match(/^#([0-9a-fA-F]{3})$/);
+    if (shortMatch) {
+        const [r, g, b] = shortMatch[1].split('');
+        return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+    }
+    const fullMatch = trimmed.match(/^#([0-9a-fA-F]{6})$/);
+    return fullMatch ? trimmed.toLowerCase() : '';
+}
+
+function hexToRgb(hexColor) {
+    const hex = normalizeHexColor(hexColor);
+    if (!hex) return null;
+    return {
+        r: parseInt(hex.slice(1, 3), 16),
+        g: parseInt(hex.slice(3, 5), 16),
+        b: parseInt(hex.slice(5, 7), 16)
+    };
+}
+
+function normalizeColorList(rawColors = []) {
+    if (!Array.isArray(rawColors)) return [];
+    const normalized = rawColors
+        .map(normalizeHexColor)
+        .filter(Boolean)
+        .filter(color => !DEFAULT_CATEGORY_COLORS.includes(color));
+    return [...new Set(normalized)];
+}
+
 function normalizeCategories(rawCategories) {
     if (!Array.isArray(rawCategories) || !rawCategories.length) {
         return DEFAULT_CATEGORIES.map(cat => ({ ...cat, subcats: [...cat.subcats] }));
@@ -39,9 +76,10 @@ function normalizeCategories(rawCategories) {
             const subcats = Array.isArray(cat?.subcats)
                 ? [...new Set(cat.subcats.map(sub => String(sub || '').trim()).filter(Boolean))]
                 : [];
+            const color = normalizeHexColor(cat?.color);
 
             if (!label || !id) return null;
-            return { id, label, subcats };
+            return { id, label, subcats, color };
         })
         .filter(Boolean);
 }
@@ -72,7 +110,9 @@ const state = {
     selectedCategory: null,
     selectedSubcat: null,
     configFileHandle: null,
-    configSource: 'default'
+    configSource: 'default',
+    customCategoryColors: normalizeColorList(JSON.parse(localStorage.getItem('customCategoryColors') || '[]')),
+    openCategoryColorMenuFor: null
 };
 const viewIcons = {
     list: `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
@@ -116,6 +156,16 @@ const DOM = {
 // Checkbox Zustand aus LocalStorage initialisieren
 if (localStorage.getItem('compressCheck') === 'true') DOM.compressCheck.checked = true;
 DOM.compressCheck.addEventListener('change', (e) => localStorage.setItem('compressCheck', e.target.checked));
+
+const categoryColorMenu = document.createElement('div');
+categoryColorMenu.className = 'category-color-menu hidden fixed z-[90] w-56 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 backdrop-blur shadow-xl p-3';
+categoryColorMenu.addEventListener('click', (e) => e.stopPropagation());
+document.body.appendChild(categoryColorMenu);
+
+const categoryCustomColorInput = document.createElement('input');
+categoryCustomColorInput.type = 'color';
+categoryCustomColorInput.className = 'sr-only';
+document.body.appendChild(categoryCustomColorInput);
 
 /** =========================================================================
  * MODUL: 3D MAP CALLBACKS
@@ -334,20 +384,28 @@ async function verifyPermission(fileHandle, readWrite) {
 function persistConfigToLocalStorage() {
     localStorage.setItem('commentSuggestions', JSON.stringify(state.suggestions));
     localStorage.setItem('categoriesConfig', JSON.stringify(categoriesConfig));
+    localStorage.setItem('customCategoryColors', JSON.stringify(state.customCategoryColors));
 }
 
 function getConfigPayload() {
     return {
-        version: 1,
+        version: 2,
         savedAt: new Date().toISOString(),
         suggestions: state.suggestions,
-        categories: categoriesConfig
+        categories: categoriesConfig,
+        customCategoryColors: state.customCategoryColors
     };
 }
 
 function applyConfigPayload(payload) {
     state.suggestions = normalizeSuggestions(payload?.suggestions);
     categoriesConfig = normalizeCategories(payload?.categories);
+    const legacyCustomColor = normalizeHexColor(payload?.customCategoryColor) || normalizeHexColor(localStorage.getItem('customCategoryColor'));
+    state.customCategoryColors = normalizeColorList([
+        ...(payload?.customCategoryColors || []),
+        ...state.customCategoryColors,
+        ...(legacyCustomColor ? [legacyCustomColor] : [])
+    ]);
     persistConfigToLocalStorage();
 
     if (!categoriesConfig.find(cat => cat.id === state.selectedCategory)) {
@@ -611,6 +669,111 @@ DOM.clearSearchBtn.addEventListener("click", () => {
     DOM.standortSelect.focus();
 });
 
+function findCategoryById(catId) {
+    return categoriesConfig.find(entry => entry.id === catId) || null;
+}
+
+function applyCategoryToneStyles(box, color, isSelected = false) {
+    const rgb = hexToRgb(color);
+    if (!rgb) return;
+
+    const darkMode = document.documentElement.classList.contains('dark');
+    box.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? (isSelected ? 0.32 : 0.22) : (isSelected ? 0.24 : 0.14)})`;
+    box.style.borderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? (isSelected ? 0.95 : 0.62) : (isSelected ? 0.85 : 0.45)})`;
+    box.style.color = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.98 : 0.92})`;
+    if (isSelected) {
+        box.style.boxShadow = `0 0 0 2px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.78 : 0.48})`;
+    }
+}
+
+function closeCategoryColorMenu() {
+    state.openCategoryColorMenuFor = null;
+    categoryColorMenu.classList.add('hidden');
+    categoryColorMenu.innerHTML = '';
+}
+
+async function applyCategoryColor(catId, color) {
+    const cat = findCategoryById(catId);
+    const nextColor = normalizeHexColor(color);
+    if (!cat || !nextColor) return;
+    cat.color = nextColor;
+    renderCategories();
+    renderSettingsList();
+    closeCategoryColorMenu();
+    await syncConfigFile({ silent: true });
+}
+
+function openCategoryColorMenu(catId, anchorEl) {
+    const cat = findCategoryById(catId);
+    if (!cat || !anchorEl) return;
+
+    state.openCategoryColorMenuFor = catId;
+    const currentColor = normalizeHexColor(cat.color);
+    const customColors = normalizeColorList([
+        ...state.customCategoryColors,
+        ...(currentColor && !DEFAULT_CATEGORY_COLORS.includes(currentColor) ? [currentColor] : [])
+    ]);
+    const swatches = DEFAULT_CATEGORY_COLORS.map(color => `
+        <button type="button" class="category-color-swatch w-8 h-8 rounded-full border-2 transition-transform hover:scale-105 ${currentColor === color ? 'border-slate-900 dark:border-white' : 'border-white dark:border-zinc-800'}" data-color="${color}" style="background:${color};"></button>
+    `).join('');
+    const customSwatches = customColors.map(color => `
+        <button type="button" class="category-color-swatch w-8 h-8 rounded-full border-2 transition-transform hover:scale-105 ${currentColor === color ? 'border-slate-900 dark:border-white' : 'border-white dark:border-zinc-800'}" data-color="${color}" style="background:${color};"></button>
+    `).join('');
+
+    categoryColorMenu.innerHTML = `
+        <div class="flex items-center justify-between gap-2 mb-3">
+            <div>
+                <div class="text-xs font-semibold text-slate-900 dark:text-zinc-100">Farbton</div>
+                <div class="text-[11px] text-slate-500 dark:text-zinc-400 truncate">${cat.label}</div>
+            </div>
+            <button type="button" class="category-color-reset text-[11px] text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100">Zurücksetzen</button>
+        </div>
+        <div class="grid grid-cols-4 gap-2 mb-2">
+            ${swatches}
+        </div>
+        ${customSwatches ? `<div class="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mb-2">Eigene Farben</div><div class="grid grid-cols-4 gap-2 mb-2">${customSwatches}</div>` : ''}
+        <button type="button" class="category-add-custom w-full rounded-lg border border-dashed border-slate-300 dark:border-zinc-600 px-3 py-2 text-xs font-medium text-slate-600 dark:text-zinc-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">+ Eigene Farbe hinzufügen</button>
+    `;
+
+    const rect = anchorEl.getBoundingClientRect();
+    categoryColorMenu.style.top = `${Math.min(window.innerHeight - 180, rect.bottom + 8)}px`;
+    categoryColorMenu.style.left = `${Math.min(window.innerWidth - 240, Math.max(8, rect.right - 224))}px`;
+    categoryColorMenu.classList.remove('hidden');
+
+    categoryColorMenu.querySelectorAll('.category-color-swatch').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            await applyCategoryColor(catId, btn.dataset.color);
+        });
+    });
+
+    const resetBtn = categoryColorMenu.querySelector('.category-color-reset');
+    resetBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        cat.color = '';
+        renderCategories();
+        renderSettingsList();
+        closeCategoryColorMenu();
+        await syncConfigFile({ silent: true });
+    });
+
+    const customBtn = categoryColorMenu.querySelector('.category-add-custom');
+    customBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        categoryCustomColorInput.value = currentColor || customColors.at(-1) || DEFAULT_CUSTOM_CATEGORY_COLOR;
+        categoryCustomColorInput.click();
+    });
+}
+
+categoryCustomColorInput.addEventListener('input', async (e) => {
+    const nextColor = normalizeHexColor(e.target.value) || DEFAULT_CUSTOM_CATEGORY_COLOR;
+    state.customCategoryColors = normalizeColorList([...state.customCategoryColors, nextColor]);
+    persistConfigToLocalStorage();
+    if (state.openCategoryColorMenuFor) {
+        await applyCategoryColor(state.openCategoryColorMenuFor, nextColor);
+    }
+});
+
 /** =========================================================================
  * MODUL: KATEGORIEN & DATEI-VERARBEITUNG
  * ========================================================================= */
@@ -625,19 +788,34 @@ function createCategoryDropBox(cat, sub, onChangeCallback) {
 
     const isSelected = state.selectedCategory === cat.id && ((state.selectedSubcat || '') === targetSubcat);
     if (isSelected) {
-        box.classList.add('ring-2', 'ring-indigo-500', 'border-indigo-500', 'bg-indigo-50', 'text-indigo-700', 'dark:bg-indigo-900/30', 'dark:text-indigo-300');
+        if (isMainCategory && normalizeHexColor(cat.color)) {
+            box.classList.add('ring-2');
+        } else {
+            box.classList.add('ring-2', 'ring-indigo-500', 'border-indigo-500', 'bg-indigo-50', 'text-indigo-700', 'dark:bg-indigo-900/30', 'dark:text-indigo-300');
+        }
+    }
+
+    if (isMainCategory && normalizeHexColor(cat.color)) {
+        applyCategoryToneStyles(box, cat.color, isSelected);
     }
 
     const boxLabel = isMainCategory ? cat.label : sub;
+    const paletteColor = normalizeHexColor(cat.color) || '#64748b';
     let boxHtml = `
         <div class="flex items-center justify-between gap-2">
-            <span class="truncate">${boxLabel}</span>
+            <div class="min-w-0 flex items-center gap-1.5">
+                <span class="truncate">${boxLabel}</span>
+                ${isMainCategory ? `<button type="button" class="palette-btn inline-flex items-center justify-center w-5 h-5 rounded-md hover:bg-white/60 dark:hover:bg-zinc-800/70 transition-colors" title="Farbton ändern" style="color:${paletteColor};"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 -960 960 960" fill="currentColor"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm0-400Zm-177 23q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17ZM480-160q9 0 14.5-5t5.5-13q0-14-15-33t-15-57q0-42 29-67t71-25h70q66 0 113-38.5T800-518q0-121-92.5-201.5T488-800q-136 0-232 93t-96 227q0 133 93.5 226.5T480-160Z"/></svg></button>` : ''}
+            </div>
             <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-200/70 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400 group-hover/box:bg-blue-200 group-hover/box:text-blue-700 dark:group-hover/box:bg-blue-800 dark:group-hover/box:text-blue-300 transition-colors">Drop</span>
         </div>
     `;
 
-    boxHtml += `<button class="hidden group-hover/box:flex absolute top-1 right-1 items-center justify-center w-4 h-4 text-red-500 hover:text-red-700 bg-white/90 dark:bg-zinc-800 rounded-full" title="Entfernen">&times;</button>`;
+    boxHtml += `<button class="remove-cat-btn hidden group-hover/box:flex absolute top-1 right-1 items-center justify-center w-4 h-4 text-red-500 hover:text-red-700 bg-white/90 dark:bg-zinc-800 rounded-full" title="Entfernen">&times;</button>`;
     box.innerHTML = boxHtml;
+
+    const removeBtn = box.querySelector('.remove-cat-btn');
+    const paletteBtn = box.querySelector('.palette-btn');
 
     box.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -648,7 +826,7 @@ function createCategoryDropBox(cat, sub, onChangeCallback) {
         DOM.fileInput.click();
     });
 
-    box.querySelector('button').addEventListener("click", async (e) => {
+    removeBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
         if (isMainCategory) {
             await handleRemoveCategory(cat.id);
@@ -657,6 +835,17 @@ function createCategoryDropBox(cat, sub, onChangeCallback) {
         }
         if (onChangeCallback) onChangeCallback();
     });
+
+    if (isMainCategory && paletteBtn) {
+        paletteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (state.openCategoryColorMenuFor === cat.id) {
+                closeCategoryColorMenu();
+                return;
+            }
+            openCategoryColorMenu(cat.id, paletteBtn);
+        });
+    }
 
     box.addEventListener("dragover", (e) => {
         e.preventDefault();
@@ -932,6 +1121,7 @@ document.addEventListener('keydown', (e) => {
         closePreview();
         closeSettings();
         if (DOM.themeContextMenu) DOM.themeContextMenu.classList.add('hidden');
+        closeCategoryColorMenu();
     }
 });
 
@@ -1480,6 +1670,10 @@ document.addEventListener('click', (e) => {
     // Theme Context Menu
     if (!e.target.closest('#themeMenuToggle') && !e.target.closest('#themeContextMenu')) {
         if (DOM.themeContextMenu) DOM.themeContextMenu.classList.add('hidden');
+    }
+    // Category Color Menu
+    if (!e.target.closest('.palette-btn') && !e.target.closest('.category-color-menu')) {
+        closeCategoryColorMenu();
     }
 });
 
