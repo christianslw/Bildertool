@@ -1,6 +1,15 @@
 /* Globale UI-Skalierung – entspricht Browser-Zoom 75% */
+:root {
+    --ui-zoom: 0.75;
+}
+
 html {
-    zoom: 0.75;
+    zoom: var(--ui-zoom);
+}
+
+body {
+    min-height: calc(100vh / var(--ui-zoom));
+    min-width: calc(100vw / var(--ui-zoom));
 }
 
 /* Custom Styles für bearbeitbare Felder und Dropdowns */

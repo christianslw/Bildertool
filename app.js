@@ -11,6 +11,7 @@
  * MODUL: GLOBAL STATE & KONFIGURATION
  * ========================================================================= */
 const DEFAULT_SUGGESTIONS = ['Vodafone', 'Telekom', 'O2', '1&1', 'Wartung', 'Umbau', 'Demontage'];
+const DEFAULT_CONFIG_FILE_NAME = 'bildertool-config.json';
 const DEFAULT_CATEGORIES = [
     { id: "Mast", label: "Mast", subcats: ["Pandunen", "Fundament", "Antennen", "Flugwarnbefeuerung", "Steigweg", "Kabel"] },
     { id: "Kabine", label: "Kabine", subcats: ["Keller", "Sendersaal", "Dach"] },
@@ -70,7 +71,8 @@ const state = {
     suggestions: normalizeSuggestions(JSON.parse(localStorage.getItem('commentSuggestions'))),
     selectedCategory: null,
     selectedSubcat: null,
-    configFileHandle: null
+    configFileHandle: null,
+    configSource: 'default'
 };
 const viewIcons = {
     list: `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
@@ -106,7 +108,9 @@ const DOM = {
 
     configFileStatus: document.getElementById("configFileStatus"),
     chooseConfigFileBtn: document.getElementById("chooseConfigFileBtn"),
-    reloadConfigFileBtn: document.getElementById("reloadConfigFileBtn")
+    reloadConfigFileBtn: document.getElementById("reloadConfigFileBtn"),
+    themeContextMenu: document.getElementById("themeContextMenu"),
+    themeMenuToggle: document.getElementById("themeMenuToggle")
 };
 
 // Checkbox Zustand aus LocalStorage initialisieren
@@ -309,6 +313,16 @@ async function loadConfigFileHandle() {
     });
 }
 
+async function clearConfigFileHandle() {
+    const db = await getDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete('configFile');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
 async function verifyPermission(fileHandle, readWrite) {
     if (!fileHandle) return false;
     const options = readWrite ? { mode: 'readwrite' } : {};
@@ -352,9 +366,50 @@ function updateConfigFileStatus(message = '') {
         DOM.configFileStatus.textContent = message;
         return;
     }
-    DOM.configFileStatus.textContent = state.configFileHandle
-        ? `Verknüpft: ${state.configFileHandle.name}`
-        : 'Keine Konfigurationsdatei ausgewählt';
+    if (state.configFileHandle && state.configSource === 'manual') {
+        DOM.configFileStatus.textContent = `Manuell verknüpft: ${state.configFileHandle.name}`;
+        return;
+    }
+    if (state.configFileHandle) {
+        DOM.configFileStatus.textContent = `Standarddatei aktiv: ${DEFAULT_CONFIG_FILE_NAME} (browser-lokal)`;
+        return;
+    }
+    DOM.configFileStatus.textContent = 'Nur lokale Browserdaten aktiv';
+}
+
+function canUseDefaultConfigFile() {
+    return !!navigator.storage?.getDirectory;
+}
+
+async function getDefaultConfigFileHandle() {
+    if (!canUseDefaultConfigFile()) return null;
+    const rootHandle = await navigator.storage.getDirectory();
+    return rootHandle.getFileHandle(DEFAULT_CONFIG_FILE_NAME, { create: true });
+}
+
+async function initializeDefaultConfigFile(options = {}) {
+    if (!canUseDefaultConfigFile()) {
+        if (!options.silent) updateConfigFileStatus('Standarddatei nicht verfügbar, nur Browserdaten aktiv');
+        return false;
+    }
+
+    try {
+        const handle = await getDefaultConfigFileHandle();
+        state.configFileHandle = handle;
+        state.configSource = 'default';
+
+        const loaded = await loadConfigFromFileHandle(handle, { silent: true });
+        if (!loaded) {
+            await syncConfigFile({ silent: true, skipEnsure: true });
+        }
+
+        if (!options.silent) updateConfigFileStatus();
+        return true;
+    } catch (error) {
+        console.error('Standard-Konfigurationsdatei konnte nicht initialisiert werden:', error);
+        if (!options.silent) updateConfigFileStatus('Standarddatei konnte nicht geladen werden');
+        return false;
+    }
 }
 
 async function loadConfigFromFileHandle(handle, options = {}) {
@@ -376,22 +431,29 @@ async function loadConfigFromFileHandle(handle, options = {}) {
 
 async function syncConfigFile(options = {}) {
     persistConfigToLocalStorage();
-    if (!state.configFileHandle) {
-        if (!options.silent) updateConfigFileStatus('Änderungen lokal gespeichert. Bitte Konfigurationsdatei auswählen.');
-        return false;
+    if (!state.configFileHandle && !options.skipEnsure) {
+        const initialized = await initializeDefaultConfigFile({ silent: true });
+        if (!initialized) {
+            if (!options.silent) updateConfigFileStatus('Änderungen lokal gespeichert (ohne Datei)');
+            return false;
+        }
     }
 
+    if (!state.configFileHandle) return false;
+
     try {
-        const hasPermission = await verifyPermission(state.configFileHandle, true);
-        if (!hasPermission) {
-            if (!options.silent) updateConfigFileStatus('Schreibzugriff auf Konfigurationsdatei fehlt');
-            return false;
+        if (state.configSource === 'manual') {
+            const hasPermission = await verifyPermission(state.configFileHandle, true);
+            if (!hasPermission) {
+                if (!options.silent) updateConfigFileStatus('Schreibzugriff auf manuelle Konfigurationsdatei fehlt');
+                return false;
+            }
         }
 
         const writer = await state.configFileHandle.createWritable();
         await writer.write(JSON.stringify(getConfigPayload(), null, 2));
         await writer.close();
-        if (!options.silent) updateConfigFileStatus(`Gespeichert: ${state.configFileHandle.name}`);
+        if (!options.silent) updateConfigFileStatus();
         return true;
     } catch (error) {
         if (!options.silent) updateConfigFileStatus('Konfigurationsdatei konnte nicht gespeichert werden');
@@ -416,6 +478,7 @@ async function chooseConfigFile() {
         });
 
         state.configFileHandle = handle;
+        state.configSource = 'manual';
         await saveConfigFileHandle(handle);
 
         const loaded = await loadConfigFromFileHandle(handle, { silent: true });
@@ -435,7 +498,7 @@ async function chooseConfigFile() {
 
 async function reloadConfigFile() {
     if (!state.configFileHandle) {
-        updateConfigFileStatus('Keine Konfigurationsdatei ausgewählt');
+        await initializeDefaultConfigFile();
         return;
     }
     await loadConfigFromFileHandle(state.configFileHandle);
@@ -713,17 +776,82 @@ function renderCategories() {
 
 
 function handleDroppedFiles(fileList, targetConfig) {
-    const files = [...fileList].filter(f => f.type === "image/jpeg" || f.name.toLowerCase().endsWith('.jpg'));
-    processFiles(files, targetConfig);
+    processFiles(fileList, targetConfig);
 }
 
-function processFiles(files, targetConfig) {
+function isJpegFile(file) {
+    const lowerName = String(file?.name || '').toLowerCase();
+    return file?.type === 'image/jpeg' || lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg');
+}
+
+function isHeicFile(file) {
+    const lowerName = String(file?.name || '').toLowerCase();
+    return file?.type === 'image/heic'
+        || file?.type === 'image/heif'
+        || lowerName.endsWith('.heic')
+        || lowerName.endsWith('.heif');
+}
+
+function isSupportedImageFile(file) {
+    return isJpegFile(file) || isHeicFile(file);
+}
+
+async function convertHeicToJpeg(file) {
+    if (typeof heic2any !== 'function') {
+        throw new Error('HEIC-Konvertierung ist nicht verfügbar.');
+    }
+
+    const converted = await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.95
+    });
+
+    const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+    const newName = String(file.name || 'bild.heic').replace(/\.(heic|heif)$/i, '.jpg');
+    return new File([jpegBlob], newName, {
+        type: 'image/jpeg',
+        lastModified: file.lastModified || Date.now()
+    });
+}
+
+async function normalizeIncomingFiles(fileList) {
+    const accepted = [...fileList].filter(isSupportedImageFile);
+    const normalized = [];
+    const failedHeicNames = [];
+
+    for (const file of accepted) {
+        if (!isHeicFile(file)) {
+            normalized.push({ file, originalSourceName: file.name });
+            continue;
+        }
+
+        try {
+            const jpegFile = await convertHeicToJpeg(file);
+            normalized.push({ file: jpegFile, originalSourceName: file.name });
+        } catch (error) {
+            failedHeicNames.push(file.name);
+            console.error('HEIC konnte nicht konvertiert werden:', file.name, error);
+        }
+    }
+
+    if (failedHeicNames.length) {
+        alert(`Folgende HEIC-Dateien konnten nicht verarbeitet werden:\n${failedHeicNames.join('\n')}`);
+    }
+
+    return normalized;
+}
+
+async function processFiles(files, targetConfig) {
     const inputValue = DOM.standortSelect.value;
     const match = inputValue.match(/\((\d+)\)$/);
     const standortNummer = match ? match[1] : inputValue;
     const standort = standortNummer.trim() ? standortNummer.padStart(4, "0") : "";
 
-    for (const file of files) {
+    const normalizedFiles = await normalizeIncomingFiles(files);
+
+    for (const fileEntry of normalizedFiles) {
+        const file = fileEntry.file;
         const item = {
             id: crypto.randomUUID(),
             standort: standort,
@@ -732,6 +860,7 @@ function processFiles(files, targetConfig) {
             unterkategorie: targetConfig.unterkategorie,
             kommentar: "",
             originalFile: file,
+            originalSourceName: fileEntry.originalSourceName || file.name,
             objectUrl: URL.createObjectURL(file)
         };
         state.files.push(item);
@@ -781,10 +910,11 @@ function getEditorHTML(item) {
 
 function openPreview(item) {
     const finalName = buildName(item);
+    const sourceName = item.originalSourceName || item.originalFile.name;
     document.getElementById('previewImage').src = item.objectUrl;
     document.getElementById('previewNewName').textContent = finalName;
-    document.getElementById('previewOldName').innerHTML = `<span class="opacity-70">Ursprung:</span> ${item.originalFile.name}`;
-    document.getElementById('previewPath').innerHTML = `<span class="opacity-70">Zukünftiger Pfad:</span> ${item.oberkategorie}/${finalName}`;
+    document.getElementById('previewPath').textContent = `${item.oberkategorie}/${finalName}`;
+    document.getElementById('previewOldName').innerHTML = `<span class="opacity-70">Ursprung:</span> ${sourceName}`;
 
     const modal = document.getElementById('previewModal');
     modal.classList.remove('hidden');
@@ -801,6 +931,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closePreview();
         closeSettings();
+        if (DOM.themeContextMenu) DOM.themeContextMenu.classList.add('hidden');
     }
 });
 
@@ -850,9 +981,13 @@ function renderList() {
             } else if (state.viewMode === 'list') {
                 el.className = 'flex items-center p-2.5 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-md shadow-sm gap-3';
                 const finalName = buildName(item);
-                const subTextHTML = `<div class="text-[11px] text-slate-500 dark:text-zinc-400 truncate mt-0.5" title="${item.originalFile.name}">
-                  Ursprung: ${item.originalFile.name} &bull; Pfad: ${item.oberkategorie}/${finalName}
-                </div>`;
+                                const sourceName = item.originalSourceName || item.originalFile.name;
+                                const subTextHTML = `
+                                    <div class="text-[11px] text-slate-700 dark:text-zinc-300 truncate mt-0.5" title="${item.oberkategorie}/${finalName} | Ursprung: ${sourceName}">
+                                        <span>${item.oberkategorie}/${finalName}</span>
+                                        <span class="text-slate-400 dark:text-zinc-500"> &bull; Ursprung: ${sourceName}</span>
+                                    </div>
+                                `;
                 el.innerHTML = `
                   <div class="w-12 h-12 shrink-0 bg-slate-100 dark:bg-zinc-800 rounded overflow-hidden border border-slate-200 dark:border-zinc-700">
                       <img src="${item.objectUrl}" class="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity preview-trigger" alt="Vorschau" />
@@ -867,9 +1002,15 @@ function renderList() {
                 // Gallery
                 el.className = 'border border-slate-200 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 flex flex-col shadow-sm';
                 const finalName = buildName(item);
-                const subTextHTML = `<div class="text-[11px] text-slate-500 dark:text-zinc-400 truncate mt-0.5" title="${item.originalFile.name}">
-                  Ursprung: ${item.originalFile.name} &bull; Pfad: ${item.oberkategorie}/${finalName}
-                </div>`;
+                                const sourceName = item.originalSourceName || item.originalFile.name;
+                                const subTextHTML = `
+                                    <div class="text-[11px] text-slate-700 dark:text-zinc-300 truncate mt-0.5" title="${item.oberkategorie}/${finalName}">
+                                        ${item.oberkategorie}/${finalName}
+                                    </div>
+                                    <div class="text-[11px] text-slate-400 dark:text-zinc-500 truncate" title="${sourceName}">
+                                        Ursprung: ${sourceName}
+                                    </div>
+                                `;
                 el.innerHTML = `
                   <div class="relative w-full h-28 bg-slate-100 dark:bg-zinc-800 group">
                     <img src="${item.objectUrl}" alt="Vorschau" class="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity preview-trigger" />
@@ -1050,30 +1191,88 @@ function showAutocomplete(element, type) {
 function openSettings() {
     document.getElementById('settingsModal').classList.remove('hidden');
     renderSettingsList();
-    refreshThemeMenuUI();
 }
 function closeSettings() {
     document.getElementById('settingsModal').classList.add('hidden');
 }
+function toggleThemeContextMenu(event) {
+    if (event) event.stopPropagation();
+    if (!DOM.themeContextMenu) return;
+    DOM.themeContextMenu.classList.toggle('hidden');
+    refreshThemeMenuUI();
+}
+window.toggleThemeContextMenu = toggleThemeContextMenu;
+
 function renderSettingsList() {
     const list = document.getElementById('suggestionsList');
     list.innerHTML = '';
     state.suggestions.forEach((s, idx) => {
         const row = document.createElement('div');
         row.className = "flex justify-between items-center p-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded text-sm";
-        row.innerHTML = `
-                <span class="text-slate-800 dark:text-zinc-200">${s}</span>
-                <button onclick="removeSuggestion(${idx})" class="text-slate-400 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-              `;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = s;
+        input.className = 'flex-1 min-w-0 bg-transparent text-slate-800 dark:text-zinc-200 border border-transparent rounded px-2 py-1 focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-zinc-950';
+        input.title = 'Vorschlag bearbeiten';
+        input.addEventListener('blur', () => updateSuggestion(idx, input.value));
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                input.blur();
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                input.value = state.suggestions[idx] || '';
+                input.blur();
+            }
+        });
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'ml-2 text-slate-400 hover:text-red-500';
+        removeBtn.title = 'Vorschlag löschen';
+        removeBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>';
+        removeBtn.addEventListener('click', () => removeSuggestion(idx));
+
+        row.append(input, removeBtn);
         list.appendChild(row);
     });
     persistConfigToLocalStorage();
     updateConfigFileStatus();
 }
+
+function hasSuggestion(value, exceptIdx = -1) {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (!normalized) return false;
+    return state.suggestions.some((entry, idx) => idx !== exceptIdx && String(entry || '').trim().toLowerCase() === normalized);
+}
+
+function updateSuggestion(idx, nextValue) {
+    if (idx < 0 || idx >= state.suggestions.length) return;
+    const trimmed = String(nextValue || '').trim();
+    const current = state.suggestions[idx];
+
+    if (!trimmed) {
+        removeSuggestion(idx);
+        return;
+    }
+
+    if (hasSuggestion(trimmed, idx)) {
+        alert('Dieser Vorschlag existiert bereits.');
+        renderSettingsList();
+        return;
+    }
+
+    if (current !== trimmed) {
+        state.suggestions[idx] = trimmed;
+        renderSettingsList();
+        syncConfigFile();
+    }
+}
+
 function addSuggestion() {
     const input = document.getElementById('newSuggestionInput');
     const val = input.value.trim();
-    if (val && !state.suggestions.includes(val)) {
+    if (val && !hasSuggestion(val)) {
         state.suggestions.push(val);
         input.value = '';
         renderSettingsList();
@@ -1152,45 +1351,87 @@ async function executeSave(forceSaveAs = false) {
 
 async function processSaveLoop(baseHandle) {
     const isCompressing = DOM.compressCheck.checked;
-    DOM.statusEl.textContent = isCompressing ? "Komprimierung & Speicherung läuft..." : "Speicherung läuft...";
+    DOM.statusEl.textContent = isCompressing
+        ? "Speicherung läuft (Original + Komprimiert)..."
+        : "Speicherung läuft (Original)...";
     const nameTracker = {};
 
-    let targetBaseDir = baseHandle;
-    // Wenn komprimiert werden soll und ein Ordner da ist, wechsle in den "komprimiert" Unterordner
-    if (targetBaseDir && isCompressing) {
-        targetBaseDir = await baseHandle.getDirectoryHandle("komprimiert", { create: true });
-    }
+    const sanitizeFolderSegment = (value) => {
+        const cleaned = String(value || '')
+            .trim()
+            .replace(/[<>:"/\\|?*\x00-\x1F]/g, '_')
+            .replace(/\.+$/g, '')
+            .replace(/\s+/g, ' ');
+        return cleaned || 'Unbekannt';
+    };
+
+    const getStandortNameByNummer = (nummer) => {
+        if (typeof standorteDaten === 'undefined' || !Array.isArray(standorteDaten)) return '';
+        const match = standorteDaten.find(entry => String(entry?.nummer || '').padStart(4, '0') === nummer);
+        return String(match?.name || '').trim();
+    };
+
+    const getStandortFolderName = (item) => {
+        const nummer = String(item?.standort || '').trim().padStart(4, '0') || '0000';
+        const standortName = getStandortNameByNummer(nummer) || sanitizeFolderSegment(DOM.standortSelect.value.replace(/\(\d+\)\s*$/, '').trim()) || 'Unbekannt';
+        return sanitizeFolderSegment(`${nummer}_${standortName}`);
+    };
+
+    const getUniqueName = (folderPath, proposedName) => {
+        if (!nameTracker[folderPath]) nameTracker[folderPath] = {};
+        if (nameTracker[folderPath][proposedName]) {
+            const count = nameTracker[folderPath][proposedName]++;
+            return proposedName.replace(/\.jpg$/i, `_${count}.jpg`);
+        }
+        nameTracker[folderPath][proposedName] = 1;
+        return proposedName;
+    };
 
     for (const item of state.files) {
-        let finalName = buildName(item);
+        const standortFolder = getStandortFolderName(item);
         const folderName = item.oberkategorie;
+        const basePathKey = `${standortFolder}/${folderName}`;
+        const compressedPathKey = `${standortFolder}/_komprimiert/${folderName}`;
+        const finalNameOriginal = getUniqueName(basePathKey, buildName(item));
+        const finalNameCompressed = isCompressing
+            ? getUniqueName(compressedPathKey, buildName(item))
+            : null;
 
-        // Verhindere Überschreiben bei identischen generierten Namen
-        if (!nameTracker[folderName]) nameTracker[folderName] = {};
-        if (nameTracker[folderName][finalName]) {
-            let count = nameTracker[folderName][finalName]++;
-            finalName = finalName.replace(/\.jpg$/i, `_${count}.jpg`);
-        } else {
-            nameTracker[folderName][finalName] = 1;
-        }
+        const originalData = item.originalFile;
+        const compressedData = isCompressing ? await compressToUnder1MB(item.originalFile) : null;
 
-        let fileData = item.originalFile;
-        if (isCompressing) {
-            fileData = await compressToUnder1MB(item.originalFile);
-        }
+        if (baseHandle) {
+            const standortDir = await baseHandle.getDirectoryHandle(standortFolder, { create: true });
 
-        if (targetBaseDir) {
-            const subDir = await targetBaseDir.getDirectoryHandle(folderName, { create: true });
-            const fileHandle = await subDir.getFileHandle(finalName, { create: true });
-            const writer = await fileHandle.createWritable();
-            await writer.write(fileData);
-            await writer.close();
+            const originalCategoryDir = await standortDir.getDirectoryHandle(folderName, { create: true });
+            const originalFileHandle = await originalCategoryDir.getFileHandle(finalNameOriginal, { create: true });
+            const originalWriter = await originalFileHandle.createWritable();
+            await originalWriter.write(originalData);
+            await originalWriter.close();
+
+            if (isCompressing && compressedData) {
+                const compressedRootDir = await standortDir.getDirectoryHandle('_komprimiert', { create: true });
+                const compressedCategoryDir = await compressedRootDir.getDirectoryHandle(folderName, { create: true });
+                const compressedFileHandle = await compressedCategoryDir.getFileHandle(finalNameCompressed, { create: true });
+                const compressedWriter = await compressedFileHandle.createWritable();
+                await compressedWriter.write(compressedData);
+                await compressedWriter.close();
+            }
         } else {
             // Fallback: Normaler Download, falls showDirectoryPicker nicht existiert
-            const a = document.createElement("a");
-            a.href = isCompressing ? URL.createObjectURL(fileData) : item.objectUrl;
-            a.download = isCompressing ? `komprimiert_${folderName}_${finalName}` : `${folderName}_${finalName}`;
-            a.click();
+            const originalDownload = document.createElement("a");
+            originalDownload.href = item.objectUrl;
+            originalDownload.download = `${standortFolder}_${folderName}_${finalNameOriginal}`;
+            originalDownload.click();
+
+            if (isCompressing && compressedData) {
+                const compressedUrl = URL.createObjectURL(compressedData);
+                const compressedDownload = document.createElement("a");
+                compressedDownload.href = compressedUrl;
+                compressedDownload.download = `${standortFolder}_komprimiert_${folderName}_${finalNameCompressed}`;
+                compressedDownload.click();
+                setTimeout(() => URL.revokeObjectURL(compressedUrl), 1500);
+            }
         }
     }
     DOM.statusEl.textContent = "Erfolgreich gespeichert!";
@@ -1210,10 +1451,10 @@ DOM.clearAll.addEventListener("click", () => {
     renderList();
 });
 
-DOM.fileInput.addEventListener("change", () => {
-    const files = [...DOM.fileInput.files].filter(f => f.type === "image/jpeg" || f.name.toLowerCase().endsWith('.jpg'));
+DOM.fileInput.addEventListener("change", async () => {
+    const files = [...DOM.fileInput.files].filter(isSupportedImageFile);
     if (state.currentTarget && files.length) {
-        processFiles(files, state.currentTarget);
+        await processFiles(files, state.currentTarget);
     }
     DOM.fileInput.value = "";
 });
@@ -1236,6 +1477,10 @@ document.addEventListener('click', (e) => {
     if (!e.target.closest('#viewDropdownTrigger') && !e.target.closest('#viewDropdownMenu')) {
         DOM.viewDropdownMenu.classList.add('hidden');
     }
+    // Theme Context Menu
+    if (!e.target.closest('#themeMenuToggle') && !e.target.closest('#themeContextMenu')) {
+        if (DOM.themeContextMenu) DOM.themeContextMenu.classList.add('hidden');
+    }
 });
 
 DOM.saveDropdownTrigger.addEventListener('click', (e) => {
@@ -1245,6 +1490,12 @@ DOM.saveDropdownTrigger.addEventListener('click', (e) => {
 DOM.viewDropdownTrigger.addEventListener('click', (e) => {
     e.stopPropagation();
     DOM.viewDropdownMenu.classList.toggle('hidden');
+});
+
+window.addEventListener('beforeunload', (event) => {
+    if (!state.files.length) return;
+    event.preventDefault();
+    event.returnValue = '';
 });
 
 /** =========================================================================
@@ -1263,14 +1514,30 @@ window.onload = async () => {
         }
     } catch (e) { console.log("Kein Ordner in DB gefunden."); }
 
+    let hasManualOverride = false;
     try {
         const savedConfigHandle = await loadConfigFileHandle();
         if (savedConfigHandle) {
-            state.configFileHandle = savedConfigHandle;
-            await loadConfigFromFileHandle(savedConfigHandle, { silent: true });
+            const permission = await savedConfigHandle.queryPermission({ mode: 'readwrite' });
+            if (permission === 'granted') {
+                state.configFileHandle = savedConfigHandle;
+                state.configSource = 'manual';
+                hasManualOverride = true;
+                const loaded = await loadConfigFromFileHandle(savedConfigHandle, { silent: true });
+                if (!loaded) await syncConfigFile({ silent: true, skipEnsure: true });
+            } else {
+                await clearConfigFileHandle();
+            }
         }
-    } catch (e) { console.log("Keine Konfigurationsdatei in DB gefunden."); }
+    } catch (e) {
+        console.log("Manuelle Konfigurationsdatei nicht verfügbar, verwende Standarddatei.");
+    }
+
+    if (!hasManualOverride) {
+        await initializeDefaultConfigFile({ silent: true });
+    }
 
     updateConfigFileStatus();
+    refreshThemeMenuUI();
     updateSaveButtonUI();
 };

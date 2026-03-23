@@ -192,7 +192,7 @@
         </div>
     </div>
 
-    <input id="fileInput" type="file" accept="image/jpeg" multiple hidden />
+    <input id="fileInput" type="file" accept="image/jpeg,.jpg,.jpeg,image/heic,image/heif,.heic,.heif" multiple hidden />
 
     <!-- Custom Autocomplete Dropdown (für Kommentare & Standorte) -->
     <div id="autocompleteDropdown" class="custom-dropdown hidden absolute w-56 text-sm"></div>
@@ -201,10 +201,10 @@
     <div id="settingsModal"
         class="fixed inset-0 bg-slate-900/50 dark:bg-black/80 z-[60] hidden flex items-center justify-center p-4">
         <div
-            class="bg-white dark:bg-zinc-900 rounded-md shadow-xl w-full max-w-2xl border border-slate-200 dark:border-zinc-700 overflow-hidden flex flex-col">
+            class="bg-white dark:bg-zinc-900 rounded-md shadow-xl w-full max-w-xl border border-slate-200 dark:border-zinc-700 overflow-hidden flex flex-col">
             <div
                 class="p-4 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center bg-slate-50 dark:bg-zinc-950">
-                <h3 class="font-semibold text-slate-900 dark:text-zinc-100">Einstellungen & Konfiguration</h3>
+                <h3 class="font-semibold text-slate-900 dark:text-zinc-100">Einstellungen</h3>
                 <button onclick="closeSettings()"
                     class="text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200"><svg class="w-5 h-5"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,43 +212,18 @@
                         </path>
                     </svg></button>
             </div>
-            <div class="p-5 flex-1 overflow-y-auto">
-                <div class="rounded-md border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 mb-6">
-                    <h4 class="text-sm font-semibold text-slate-900 dark:text-zinc-100 mb-4">Darstellung</h4>
-
-                    <div class="mb-5">
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 mb-3">Aussehen (Hell/Dunkel)</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button id="btn-appearance-light" onclick="changeAppearance('light')" class="py-2 px-3 text-sm font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Hell</button>
-                            <button id="btn-appearance-dark" onclick="changeAppearance('dark')" class="py-2 px-3 text-sm font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dunkel</button>
-                            <button id="btn-appearance-system" onclick="changeAppearance('system')" class="py-2 px-3 text-sm font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">System</button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 mb-3">Farbschema</label>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            <button id="btn-theme-standard" onclick="changeColorTheme('standard')" class="py-2 px-3 text-sm font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Standard</button>
-                            <button id="btn-theme-dracula" onclick="changeColorTheme('dracula')" class="py-2 px-3 text-sm font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dracula</button>
-                            <button id="btn-theme-dracula-laser" onclick="changeColorTheme('dracula-laser')" class="py-2 px-3 text-sm font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dracula Laser</button>
-                            <button id="btn-theme-kirschbluete" onclick="changeColorTheme('kirschbluete')" class="py-2 px-3 text-sm font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Kirschblüte</button>
-                            <button id="btn-theme-swr-ms" onclick="changeColorTheme('swr-ms')" class="py-2 px-3 text-sm font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors md:col-span-2">SWR MS</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-6 rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 p-4">
-                    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div class="p-4 md:p-5 flex-1 overflow-y-auto space-y-4">
+                <div class="rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 p-3">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <h4 class="text-sm font-semibold text-slate-900 dark:text-zinc-100">Lokale Konfigurationsdatei</h4>
-                            <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">Kommentarvorschläge sowie Haupt- und Unterkategorien werden in einer JSON-Datei gespeichert und von dort geladen.</p>
-                            <div id="configFileStatus" class="text-xs text-blue-600 dark:text-blue-400 mt-2">Keine Konfigurationsdatei ausgewählt</div>
+                            <h4 class="text-sm font-semibold text-slate-900 dark:text-zinc-100">Konfigurationsdatei</h4>
+                            <div id="configFileStatus" class="text-xs text-slate-600 dark:text-zinc-300 mt-1">Standarddatei wird geladen...</div>
                         </div>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="flex gap-2 shrink-0">
                             <button id="chooseConfigFileBtn"
-                                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors">Datei wählen / erstellen</button>
+                                class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded text-xs font-medium transition-colors">Anderen Ort wählen</button>
                             <button id="reloadConfigFileBtn"
-                                class="px-3 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded-md text-sm font-medium transition-colors">Neu laden</button>
+                                class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded text-xs font-medium transition-colors">Neu laden</button>
                         </div>
                     </div>
                 </div>
@@ -270,6 +245,40 @@
         </div>
     </div>
 
+    <div class="fixed right-4 bottom-4 z-[65] flex flex-col items-end gap-2">
+        <div id="themeContextMenu" class="hidden w-72 rounded-md border border-slate-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 backdrop-blur shadow-xl p-3">
+            <div class="mb-3">
+                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 mb-2">Aussehen</div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="btn-appearance-light" onclick="changeAppearance('light')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Hell</button>
+                    <button id="btn-appearance-dark" onclick="changeAppearance('dark')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dunkel</button>
+                    <button id="btn-appearance-system" onclick="changeAppearance('system')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">System</button>
+                </div>
+            </div>
+            <div>
+                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 mb-2">Farbschema</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-theme-standard" onclick="changeColorTheme('standard')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Standard</button>
+                    <button id="btn-theme-dracula" onclick="changeColorTheme('dracula')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dracula</button>
+                    <button id="btn-theme-dracula-laser" onclick="changeColorTheme('dracula-laser')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dracula Laser</button>
+                    <button id="btn-theme-kirschbluete" onclick="changeColorTheme('kirschbluete')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Kirschblüte</button>
+                    <button id="btn-theme-swr-ms" onclick="changeColorTheme('swr-ms')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors col-span-2">SWR MS</button>
+                </div>
+            </div>
+        </div>
+
+        <button id="themeMenuToggle"
+            class="p-2 rounded-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-md text-slate-600 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-400 transition-colors"
+            title="Design-Menü öffnen" onclick="toggleThemeContextMenu(event)">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="13.5" cy="6.5" r="2.5"></circle>
+                <circle cx="6.5" cy="12" r="2.5"></circle>
+                <circle cx="13.5" cy="17.5" r="2.5"></circle>
+                <circle cx="18" cy="12" r="2.5"></circle>
+            </svg>
+        </button>
+    </div>
+
     <!-- PREVIEW MODAL -->
     <div id="previewModal"
         class="fixed inset-0 bg-zinc-950/95 z-[70] hidden flex-col items-center justify-center p-4 backdrop-blur-sm transition-opacity"
@@ -286,13 +295,14 @@
             onclick="event.stopPropagation()">
             <div id="previewNewName" class="text-blue-400 font-mono text-base md:text-lg font-bold truncate mb-1.5">
             </div>
-            <div id="previewOldName" class="text-zinc-400 text-xs md:text-sm truncate"></div>
-            <div id="previewPath" class="text-zinc-500 text-xs md:text-sm truncate mt-0.5"></div>
+            <div id="previewPath" class="text-zinc-200 text-xs md:text-sm truncate"></div>
+            <div id="previewOldName" class="text-zinc-500 text-xs md:text-sm truncate mt-0.5"></div>
         </div>
     </div>
 
     <script src="standorte.js"></script>
     <script src="site-2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
     <script src="app.js"></script>
 
 </body>
