@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "savedAt": "2026-03-23T08:41:30.866Z",
+  "suggestions": [
+    "Vodafone",
+    "Telekom",
+    "O2",
+    "1&1",
+    "Wartung",
+    "Umbau",
+    "Demontage",
+    "Gesamtansicht",
+    "Innenansicht"
+  ],
+  "categories": [
+    {
+      "id": "Mast",
+      "label": "Mast",
+      "subcats": [
+        "Pandunen",
+        "Fundament",
+        "Antennen",
+        "Flugwarnbefeuerung",
+        "Steigweg",
+        "Kabel"
+      ]
+    },
+    {
+      "id": "Kabine",
+      "label": "Kabine",
+      "subcats": [
+        "Keller",
+        "Sendersaal",
+        "Dach",
+        "Fundament",
+        "Fassade",
+        "Türe"
+      ]
+    },
+    {
+      "id": "Energietechnik",
+      "label": "Energietechnik",
+      "subcats": [
+        "Trafo",
+        "NEA",
+        "Evt",
+        "ZAS"
+      ]
+    },
+    {
+      "id": "Grundstück",
+      "label": "Grundstück",
+      "subcats": [
+        "Zaun",
+        "Zisterne",
+        "Zufahrt"
+      ]
+    },
+    {
+      "id": "Zufahrt",
+      "label": "Zufahrt",
+      "subcats": []
+    }
+  ]
+}
