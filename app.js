@@ -673,16 +673,59 @@ function findCategoryById(catId) {
     return categoriesConfig.find(entry => entry.id === catId) || null;
 }
 
-function applyCategoryToneStyles(box, color, isSelected = false) {
+function getCategoryAccentPalette(color) {
     const rgb = hexToRgb(color);
-    if (!rgb) return;
+    if (!rgb) return null;
 
     const darkMode = document.documentElement.classList.contains('dark');
-    box.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? (isSelected ? 0.32 : 0.22) : (isSelected ? 0.24 : 0.14)})`;
-    box.style.borderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? (isSelected ? 0.95 : 0.62) : (isSelected ? 0.85 : 0.45)})`;
-    box.style.color = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.98 : 0.92})`;
+    return {
+        text: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.98 : 0.92})`,
+        mutedText: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.9 : 0.84})`,
+        background: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.2 : 0.12})`,
+        backgroundStrong: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.28 : 0.18})`,
+        border: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.62 : 0.45})`,
+        borderStrong: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.9 : 0.72})`,
+        shadow: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.22 : 0.14})`
+    };
+}
+
+function getCategoryColor(catId) {
+    return normalizeHexColor(findCategoryById(catId)?.color);
+}
+
+function createCategoryAccentText(text, color, fallbackClassName = '') {
+    const span = document.createElement('span');
+    span.textContent = text;
+    if (fallbackClassName) {
+        span.className = fallbackClassName;
+    }
+
+    const palette = getCategoryAccentPalette(color);
+    if (palette) {
+        span.style.color = palette.text;
+    }
+
+    return span;
+}
+
+function buildCategoryPathHTML(categoryName, fileName) {
+    const palette = getCategoryAccentPalette(getCategoryColor(categoryName));
+    const categoryStyle = palette
+        ? `style="color:${palette.text}; font-weight:700;"`
+        : 'class="font-semibold text-slate-700 dark:text-zinc-300"';
+
+    return `<span ${categoryStyle}>${categoryName}</span><span class="text-slate-400 dark:text-zinc-500">/</span><span>${fileName}</span>`;
+}
+
+function applyCategoryToneStyles(box, color, isSelected = false) {
+    const palette = getCategoryAccentPalette(color);
+    if (!palette) return;
+
+    box.style.backgroundColor = isSelected ? palette.backgroundStrong : palette.background;
+    box.style.borderColor = isSelected ? palette.borderStrong : palette.border;
+    box.style.color = palette.text;
     if (isSelected) {
-        box.style.boxShadow = `0 0 0 2px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${darkMode ? 0.78 : 0.48})`;
+        box.style.boxShadow = `0 0 0 2px ${palette.shadow}`;
     }
 }
 
@@ -698,6 +741,7 @@ async function applyCategoryColor(catId, color) {
     if (!cat || !nextColor) return;
     cat.color = nextColor;
     renderCategories();
+    renderList();
     renderSettingsList();
     closeCategoryColorMenu();
     await syncConfigFile({ silent: true });
@@ -752,6 +796,7 @@ function openCategoryColorMenu(catId, anchorEl) {
         e.stopPropagation();
         cat.color = '';
         renderCategories();
+        renderList();
         renderSettingsList();
         closeCategoryColorMenu();
         await syncConfigFile({ silent: true });
@@ -889,14 +934,26 @@ function renderCategories() {
     if (state.selectedCategory) {
         const selectedCat = categoriesConfig.find(c => c.id === state.selectedCategory);
         if (selectedCat && state.selectedSubcat) {
-            DOM.contextTitle.innerHTML = `Ausgewählt: <span class="text-blue-600 dark:text-blue-400 font-bold">${selectedCat.label}</span> <span class="text-slate-400 dark:text-zinc-500 font-normal">›</span> <span class="text-indigo-600 dark:text-indigo-400 font-bold">${state.selectedSubcat}</span>`;
+            DOM.contextTitle.textContent = '';
+            DOM.contextTitle.append('Ausgewählt: ');
+            DOM.contextTitle.append(createCategoryAccentText(selectedCat.label, selectedCat.color, 'font-bold text-blue-600 dark:text-blue-400'));
+            DOM.contextTitle.append(' ');
+
+            const separator = document.createElement('span');
+            separator.className = 'text-slate-400 dark:text-zinc-500 font-normal';
+            separator.textContent = '›';
+            DOM.contextTitle.append(separator);
+            DOM.contextTitle.append(' ');
+            DOM.contextTitle.append(createCategoryAccentText(state.selectedSubcat, selectedCat.color, 'font-bold text-indigo-600 dark:text-indigo-400'));
         } else if (selectedCat) {
-            DOM.contextTitle.innerHTML = `Ausgewählt: <span class="text-blue-600 dark:text-blue-400 font-bold">${selectedCat.label}</span>`;
+            DOM.contextTitle.textContent = '';
+            DOM.contextTitle.append('Ausgewählt: ');
+            DOM.contextTitle.append(createCategoryAccentText(selectedCat.label, selectedCat.color, 'font-bold text-blue-600 dark:text-blue-400'));
         } else {
-            DOM.contextTitle.innerHTML = `Bauteile & Kategorien`;
+            DOM.contextTitle.textContent = 'Bauteile & Kategorien';
         }
     } else {
-        DOM.contextTitle.innerHTML = `Bauteile & Kategorien`;
+        DOM.contextTitle.textContent = 'Bauteile & Kategorien';
     }
 
     DOM.contextChips.innerHTML = '';
@@ -1141,15 +1198,40 @@ function renderList() {
     });
 
     for (const cat in groups) {
+        const categoryPalette = getCategoryAccentPalette(getCategoryColor(cat));
+        const groupSection = document.createElement('section');
+        groupSection.className = 'mb-5';
+        if (categoryPalette) {
+            groupSection.style.borderLeft = `3px solid ${categoryPalette.borderStrong}`;
+            groupSection.style.paddingLeft = '0.9rem';
+        }
+
         const catHeader = document.createElement("h3");
         catHeader.className = "text-xs font-bold text-slate-500 dark:text-zinc-400 mt-4 mb-2 uppercase tracking-wider border-b border-slate-200 dark:border-zinc-800 pb-1";
         catHeader.textContent = cat;
-        DOM.fileListContainer.appendChild(catHeader);
+        if (categoryPalette) {
+            catHeader.style.color = categoryPalette.text;
+            catHeader.style.borderBottomColor = categoryPalette.border;
+        }
+        groupSection.appendChild(catHeader);
 
         const wrapper = document.createElement("div");
         if (state.viewMode === 'list') wrapper.className = 'flex flex-col gap-2';
         else if (state.viewMode === 'compact') wrapper.className = 'flex flex-col gap-1 border border-slate-200 dark:border-zinc-800 rounded-md overflow-hidden shadow-sm';
         else wrapper.className = 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4';
+
+        if (categoryPalette) {
+            if (state.viewMode === 'compact') {
+                wrapper.style.borderColor = categoryPalette.border;
+                wrapper.style.boxShadow = `0 8px 24px -18px ${categoryPalette.shadow}`;
+            } else if (state.viewMode === 'list') {
+                wrapper.style.borderLeft = `2px solid ${categoryPalette.border}`;
+                wrapper.style.paddingLeft = '0.75rem';
+            } else {
+                wrapper.style.borderTop = `2px solid ${categoryPalette.border}`;
+                wrapper.style.paddingTop = '0.75rem';
+            }
+        }
 
         groups[cat].forEach((item) => {
             const el = document.createElement("div");
@@ -1174,7 +1256,7 @@ function renderList() {
                                 const sourceName = item.originalSourceName || item.originalFile.name;
                                 const subTextHTML = `
                                     <div class="text-[11px] text-slate-700 dark:text-zinc-300 truncate mt-0.5" title="${item.oberkategorie}/${finalName} | Ursprung: ${sourceName}">
-                                        <span>${item.oberkategorie}/${finalName}</span>
+                                        <span>${buildCategoryPathHTML(item.oberkategorie, finalName)}</span>
                                         <span class="text-slate-400 dark:text-zinc-500"> &bull; Ursprung: ${sourceName}</span>
                                     </div>
                                 `;
@@ -1195,7 +1277,7 @@ function renderList() {
                                 const sourceName = item.originalSourceName || item.originalFile.name;
                                 const subTextHTML = `
                                     <div class="text-[11px] text-slate-700 dark:text-zinc-300 truncate mt-0.5" title="${item.oberkategorie}/${finalName}">
-                                        ${item.oberkategorie}/${finalName}
+                                        ${buildCategoryPathHTML(item.oberkategorie, finalName)}
                                     </div>
                                     <div class="text-[11px] text-slate-400 dark:text-zinc-500 truncate" title="${sourceName}">
                                         Ursprung: ${sourceName}
@@ -1230,7 +1312,8 @@ function renderList() {
 
             wrapper.append(el);
         });
-        DOM.fileListContainer.appendChild(wrapper);
+        groupSection.appendChild(wrapper);
+        DOM.fileListContainer.appendChild(groupSection);
     }
 
     updateStatusText();
