@@ -94,3 +94,36 @@ html.dark ::-webkit-scrollbar-thumb {
 .dark .categories-grid::-webkit-scrollbar-track {
     background: transparent;
 }
+
+/* ---- Drop target visual feedback ---- */
+
+/* Floating badge showing drop destination */
+.drop-badge {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.5rem;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem 0.2rem 0.45rem;
+    border-radius: 9999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #fff;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.01em;
+    transition: opacity 0.12s;
+}
+.drop-badge.hidden { display: none; }
+
+/* Container-level drop target (no sections in list) */
+#fileListContainer.container-drop-target {
+    outline: 2px dashed #94a3b8;
+    outline-offset: -4px;
+    border-radius: 6px;
+    position: relative;
+}

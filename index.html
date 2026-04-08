@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Standort Foto Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="tailwind-init.js"></script>
+    <script src="js/tailwind-init.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -16,26 +17,29 @@
     <!-- Navbar / Header -->
     <div
         class="px-4 md:px-8 py-3 flex justify-between items-center border-b border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-        <h1 class="text-xl font-semibold flex items-center gap-2">
-            <svg class="h-6 w-auto text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                </path>
-            </svg>
-            Standort Foto Tool
+        <h1 class="text-xl font-semibold flex items-center gap-2 truncate">
+                    <svg class="h-7 w-auto shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 815 240" style="overflow:hidden">
+                        <!-- Arrows rendered first so letters layer on top while they emerge -->
+                        <g class="swr-arrow-1 text-slate-900 dark:text-zinc-100" fill="currentColor">
+                            <path d="m588.391 240 118.971-120L588.391 0v78.074L630.302 120l-41.911 41.926V240Z"/>
+                        </g>
+                        <g class="swr-arrow-2 text-slate-900 dark:text-zinc-100" fill="currentColor">
+                            <path d="M695.294 78.074V0l118.97 120-118.97 120v-78.074L737.204 120l-41.91-41.926Z"/>
+                        </g>
+                        <!-- SWR letters slide up from bottom -->
+                        <g class="swr-letters text-slate-900 dark:text-zinc-100" fill="currentColor">
+                            <path d="M303.562 146.776l21.765-133.7402h50.293L337.466 229.078h-56.327L256.697 90.4052 232.254 229.078h-56.327L137.773 13.0358h50.269l21.743 133.7402L231.55 13.0358h50.246l21.766 133.7402Z"/>
+                            <path d="M489.449 135.408c5.752 8.315 11.2 16.301 16.647 24.287l45.644 69.383h-60.671l-51.42-84.416h-1.926v84.393h-49.917V13.1063c18.244-1.2684 41.606-1.5972 67.598-1.5972 51.02 0 80.769 18.3206 80.769 64.1221 0 29.0778-17.915 52.7538-46.724 59.7768Zm-39.211-26.236c21.225 0 34.726-11.1802 34.726-29.4069 0-16.9348-9.979-27.1756-33.435-27.1521-5.142 0-10.941.3054-13.829.6342v55.2908c2.583.305 7.725.634 12.538.634Z"/>
+                            <path d="M139.816 159.154c0 41.95-33.529 73.071-88.659 73.071-15.0269 0-30.7347-1.597-44.49366-4.815l2.20708-47.328c12.13888 4.486 30.42938 9.137 46.09028 9.137 18.314 0 31.486-7.681 31.486-23.042 0-15.404-14.8508-21.164-32.2422-27.91C30.0415 128.895.974344 117.62.0186443 75.9366-.897056 35.3494 31.9742 8.52613 86.1414 8.52613c11.505 0 25.8746 1.26835 39.3286 3.85207l-.118 44.0634c-12.139-3.5232-28.3161-6.7411-41.1124-6.7411-20.8967 0-30.8521 8.9489-30.8521 21.1157 0 13.9038 14.7894 19.8656 32.1325 26.8568 24.582 9.91 54.296 21.887 54.296 61.481Z"/>
+                        </g>
+                    </svg>
+                    <span class="truncate swr-title">Foto-Tool</span>
         </h1>
         <div class="flex items-center gap-4">
             <button onclick="openSettings()"
                 class="p-2 text-slate-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800"
                 title="Einstellungen">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                    </path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
+                <i class="mdi mdi-cog text-xl"></i>
             </button>
         </div>
     </div>
@@ -45,27 +49,19 @@
         class="flex-1 flex flex-col md:flex-row overflow-hidden mx-4 md:mx-8 my-4 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-md shadow-sm">
 
         <!-- Linke Seite (Kategorien & Standort) -->
-        <div
-            class="w-full md:w-1/2 p-4 border-b md:border-b-0 md:border-r border-slate-200 dark:border-zinc-800 flex flex-col bg-slate-50/30 dark:bg-zinc-900/30">
-            <div class="mb-3">
-                <!-- Standort Suche -->
+        <div id="categoriesPanel"
+            class="w-full md:flex-none p-4 border-b md:border-b-0 border-slate-200 dark:border-zinc-800 flex flex-col bg-slate-50/30 dark:bg-zinc-900/30 overflow-hidden">
+            <div class="mb-2">
+                <!-- Standort Suche (manuell; normalerweise per GPS automatisch) -->
                 <div class="relative">
-                    <label
-                        class="block text-[11px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wide mb-1">Standort</label>
+                    <label class="block text-[10px] font-medium text-slate-400 dark:text-zinc-500 mb-1">Standort <span class="font-normal italic">· optional, wird per GPS erkannt</span></label>
                     <div class="relative flex items-center">
-                        <svg class="w-4 h-4 absolute left-3 text-slate-400" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <input type="text" id="standortSelect" placeholder="Name oder Nummer suchen..."
-                            autocomplete="off"
-                            class="w-full py-1.5 pl-9 pr-8 text-sm bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700 rounded-md focus:outline-none focus:border-blue-500 transition-colors dark:text-white" />
+                        <i class="mdi mdi-magnify absolute left-2.5 text-slate-300 dark:text-zinc-600 text-sm"></i>
+                        <input type="text" id="standortSelect" placeholder="Name oder Nummer suchen..." autocomplete="off"
+                            class="w-full py-1 pl-8 pr-8 text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded focus:outline-none focus:border-blue-400 transition-colors text-slate-600 dark:text-zinc-300" />
                         <button type="button" id="clearSearchBtn"
-                            class="absolute right-2 text-slate-400 hover:text-red-500 hidden" title="Suche löschen">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
+                            class="absolute right-2 text-slate-300 dark:text-zinc-600 hover:text-red-400 hidden" title="Suche löschen">
+                            <i class="mdi mdi-close text-sm"></i>
                         </button>
                     </div>
                     <div id="standortDropdown" class="custom-dropdown hidden w-full mt-1"></div>
@@ -80,8 +76,16 @@
             </div>
         </div>
 
+        <!-- Resizable Divider -->
+        <div id="resizeDivider" class="hidden md:flex items-center justify-center w-2 cursor-col-resize hover:bg-blue-400/20 transition-colors shrink-0 group select-none" title="Panel verschieben">
+            <div class="w-0.5 h-8 rounded-full bg-slate-300 dark:bg-zinc-600 group-hover:bg-blue-400 transition-colors"></div>
+        </div>
         <!-- Rechte Seite (Liste & Galerie & Toolbar) -->
-        <div class="w-full md:w-1/2 flex flex-col relative bg-white dark:bg-zinc-950">
+        <div id="listPanel" class="w-full md:flex-1 flex flex-col relative bg-white dark:bg-zinc-950 overflow-hidden">
+            <!-- Tab Bar -->
+            <div id="tabBar" class="flex items-center border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 px-2 pt-1 overflow-x-auto shrink-0 min-h-[38px]">
+                <!-- Tabs rendered by JS -->
+            </div>
             <!-- Toolbar -->
             <div
                 class="p-3 md:p-4 border-b border-slate-200 dark:border-zinc-800 flex flex-wrap gap-3 justify-between items-center bg-slate-50/50 dark:bg-zinc-900/50">
@@ -92,27 +96,19 @@
                         <button id="mainSaveBtn"
                             class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors flex items-center gap-2 text-sm"
                             title="Bilder abspeichern">
-                            Speichern unter
+                            Alle speichern
                         </button>
                         <button id="saveDropdownTrigger"
                             class="px-2 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-r-md border-l border-blue-800 transition-colors hidden"
                             title="Weitere Speicheroptionen">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
+                            <i class="mdi mdi-chevron-down text-base"></i>
                         </button>
                         <div id="saveDropdownMenu"
                             class="custom-dropdown hidden absolute left-0 top-full mt-1 w-48 text-sm py-1 z-[51]">
                             <div id="saveAsMenuOption"
                                 class="px-4 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer text-slate-700 dark:text-zinc-200 flex items-center gap-2">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path
-                                        d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
-                                    </path>
-                                </svg>
-                                Speichern unter...
+                                <i class="mdi mdi-content-save-all text-base"></i>
+                                Alle speichern unter...
                             </div>
                         </div>
                     </div>
@@ -128,14 +124,27 @@
                         Komprimieren
                     </label>
 
+                    <!-- Schnellimport -->
+                    <button id="quickImportBtn"
+                        class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-900/20 dark:hover:border-blue-800 dark:hover:text-blue-400 text-slate-500 dark:text-zinc-400 rounded-md transition-colors"
+                        title="Dateien / Ordner importieren (ohne Kategorie)">
+                        <i class="mdi mdi-upload text-base"></i>
+                    </button>
+                    <button id="undoBtn" disabled
+                        class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-500 dark:text-zinc-400 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Rükgängig (Strg+Z)">
+                        <i class="mdi mdi-undo text-base"></i>
+                    </button>
+                    <button id="redoBtn" disabled
+                        class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-500 dark:text-zinc-400 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Wiederholen (Strg+Y)">
+                        <i class="mdi mdi-redo text-base"></i>
+                    </button>
+
                     <button id="clearAll"
                         class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:border-red-800 dark:hover:text-red-400 text-slate-500 dark:text-zinc-400 rounded-md transition-colors"
                         title="Liste leeren">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                            </path>
-                        </svg>
+                        <i class="mdi mdi-delete text-base"></i>
                     </button>
                 </div>
 
@@ -143,8 +152,50 @@
                     <span id="status"
                         class="text-xs text-slate-500 dark:text-zinc-400 font-medium truncate max-w-[120px] sm:max-w-[180px]">0
                         Dateien</span>
+                    <!-- Filter / Sort / Group Dropdown -->
+<div class="relative">
+                        <button id="filterDropdownTrigger"
+                            class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md transition-colors flex items-center justify-center w-8 h-8 shadow-sm"
+                            title="Filter, Sortierung &amp; Gruppierung">
+                            <i class="mdi mdi-tune-variant text-base"></i>
+                        </button>
+                        <div id="filterDropdownMenu"
+                            class="custom-dropdown hidden absolute right-0 top-full mt-1 w-72 z-[51] p-3">
+                            <!-- Suche -->
+                            <div class="mb-3">
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wide mb-1">Suche</label>
+                                <input id="filterTextInput" type="text" placeholder="Name, Standort, Kommentar…"
+                                    class="w-full text-xs p-1.5 rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:outline-none" />
+                            </div>
+                            <!-- Sortieren -->
+                            <div class="mb-3">
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wide mb-1.5">Sortieren nach</label>
+                                <div class="flex flex-wrap gap-1 mb-1.5">
+                                    <button class="sort-key-btn text-[10px] px-2 py-0.5 rounded-full border" data-sort="lastModified">Datum</button>
+                                    <button class="sort-key-btn text-[10px] px-2 py-0.5 rounded-full border" data-sort="name">Name</button>
+                                    <button class="sort-key-btn text-[10px] px-2 py-0.5 rounded-full border" data-sort="standort">Standort</button>
+                                    <button class="sort-key-btn text-[10px] px-2 py-0.5 rounded-full border" data-sort="kategorie">Kategorie</button>
+                                </div>
+                                <div class="flex gap-1">
+                                    <button class="sort-dir-btn text-[10px] px-2 py-0.5 rounded-full border" data-dir="asc">▲ Aufsteigend</button>
+                                    <button class="sort-dir-btn text-[10px] px-2 py-0.5 rounded-full border" data-dir="desc">▼ Absteigend</button>
+                                </div>
+                            </div>
+                            <!-- Gruppieren -->
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wide mb-1.5">Gruppieren nach</label>
+                                <div class="flex flex-wrap gap-1">
+                                    <button class="group-by-btn text-[10px] px-2 py-0.5 rounded-full border" data-group="">Keine</button>
+                                    <button class="group-by-btn text-[10px] px-2 py-0.5 rounded-full border" data-group="datum">Datum</button>
+                                    <button class="group-by-btn text-[10px] px-2 py-0.5 rounded-full border" data-group="standort">Standort</button>
+                                    <button class="group-by-btn text-[10px] px-2 py-0.5 rounded-full border" data-group="kategorie">Kategorie</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- View Dropdown -->
-                    <div class="relative">
+<div class="relative">
                         <button id="viewDropdownTrigger"
                             class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md transition-colors flex items-center justify-center w-8 h-8 shadow-sm"
                             title="Ansicht wechseln">
@@ -154,31 +205,17 @@
                             class="custom-dropdown hidden absolute right-0 top-full mt-1 w-40 text-sm py-1 z-[51]">
                             <div class="view-option px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer text-slate-700 dark:text-zinc-200 flex items-center gap-2"
                                 data-view="list">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
-                                </svg>
+                                <i class="mdi mdi-view-list text-base"></i>
                                 Detail Liste
                             </div>
                             <div class="view-option px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer text-slate-700 dark:text-zinc-200 flex items-center gap-2"
                                 data-view="gallery">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <rect x="3" y="3" width="7" height="7"></rect>
-                                    <rect x="14" y="3" width="7" height="7"></rect>
-                                    <rect x="14" y="14" width="7" height="7"></rect>
-                                    <rect x="3" y="14" width="7" height="7"></rect>
-                                </svg>
+                                <i class="mdi mdi-view-grid text-base"></i>
                                 Galerie
                             </div>
                             <div class="view-option px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer text-slate-700 dark:text-zinc-200 flex items-center gap-2"
                                 data-view="compact">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                                </svg>
+                                <i class="mdi mdi-view-agenda text-base"></i>
                                 Kompakt
                             </div>
                         </div>
@@ -193,6 +230,7 @@
     </div>
 
     <input id="fileInput" type="file" accept="image/jpeg,.jpg,.jpeg,image/heic,image/heif,.heic,.heif" multiple hidden />
+    <input id="folderInput" type="file" accept="image/jpeg,.jpg,.jpeg,image/heic,image/heif,.heic,.heif" webkitdirectory multiple hidden />
 
     <!-- Custom Autocomplete Dropdown (für Kommentare & Standorte) -->
     <div id="autocompleteDropdown" class="custom-dropdown hidden absolute w-56 text-sm"></div>
@@ -206,11 +244,7 @@
                 class="p-4 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center bg-slate-50 dark:bg-zinc-950">
                 <h3 class="font-semibold text-slate-900 dark:text-zinc-100">Einstellungen</h3>
                 <button onclick="closeSettings()"
-                    class="text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200"><svg class="w-5 h-5"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg></button>
+                    class="text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200"><i class="mdi mdi-close text-xl"></i></button>
             </div>
             <div class="p-4 md:p-5 flex-1 overflow-y-auto space-y-4">
                 <div class="rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 p-3">
@@ -226,6 +260,18 @@
                                 class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded text-xs font-medium transition-colors">Neu laden</button>
                         </div>
                     </div>
+                </div>
+
+                <div class="rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 p-3">
+                    <h4 class="text-sm font-semibold text-slate-900 dark:text-zinc-100 mb-2">Standort-Automatik</h4>
+                    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300 cursor-pointer mb-2 select-none">
+                        <input type="checkbox" id="autoGpsToggle" checked class="w-4 h-4 accent-blue-600">
+                        GPS-Standort automatisch zuordnen
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300 cursor-pointer select-none">
+                        <input type="checkbox" id="excludeUnmatchedToggle" class="w-4 h-4 accent-blue-600">
+                        Bilder ohne Standort ausschließen
+                    </label>
                 </div>
 
                 <div class="rounded-md border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
@@ -270,27 +316,160 @@
         <button id="themeMenuToggle"
             class="p-2 rounded-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-md text-slate-600 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-400 transition-colors"
             title="Design-Menü öffnen" onclick="toggleThemeContextMenu(event)">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="13.5" cy="6.5" r="2.5"></circle>
-                <circle cx="6.5" cy="12" r="2.5"></circle>
-                <circle cx="13.5" cy="17.5" r="2.5"></circle>
-                <circle cx="18" cy="12" r="2.5"></circle>
-            </svg>
+            <i class="mdi mdi-palette text-xl"></i>
         </button>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none"></div>
+
+    <!-- PROMPT MODAL -->
+    <div id="promptModal" class="fixed inset-0 bg-slate-900/50 dark:bg-black/80 z-[80] hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-900 rounded-md shadow-xl w-full max-w-sm border border-slate-200 dark:border-zinc-700 overflow-hidden">
+            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950">
+                <h3 id="promptModalTitle" class="font-semibold text-slate-900 dark:text-zinc-100 text-sm"></h3>
+            </div>
+            <div class="p-4">
+                <input type="text" id="promptModalInput" class="w-full p-2 rounded-md border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 focus:border-blue-500 outline-none text-sm mb-4" />
+                <div class="flex justify-end gap-2">
+                    <button id="promptModalCancel" class="px-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Abbrechen</button>
+                    <button id="promptModalConfirm" class="px-3 py-1.5 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRM MODAL -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/50 dark:bg-black/80 z-[80] hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-900 rounded-md shadow-xl w-full max-w-sm border border-slate-200 dark:border-zinc-700 overflow-hidden">
+            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950">
+                <h3 class="font-semibold text-slate-900 dark:text-zinc-100 text-sm">Bestätigung</h3>
+            </div>
+            <div class="p-4">
+                <p id="confirmModalMessage" class="text-sm text-slate-700 dark:text-zinc-300 mb-4"></p>
+                <div class="flex justify-end gap-2">
+                    <button id="confirmModalCancel" class="px-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Abbrechen</button>
+                    <button id="confirmModalOk" class="px-3 py-1.5 text-sm rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition-colors">Löschen</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- PREVIEW MODAL -->
     <div id="previewModal"
         class="fixed inset-0 bg-zinc-950/95 z-[70] hidden flex-col items-center justify-center p-4 backdrop-blur-sm transition-opacity"
         onclick="if(event.target===this) closePreview()">
-        <button onclick="closePreview()"
-            class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
+
+        <!-- Schließen-Button -->
+        <button id="closePreviewBtn" onclick="closePreview()"
+            class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors z-10">
+            <i class="mdi mdi-close" style="font-size:2rem;line-height:1"></i>
         </button>
-        <img id="previewImage" class="max-h-[70vh] max-w-full object-contain rounded-md shadow-2xl mb-6" src=""
-            alt="Vorschau" />
+
+        <!-- Annotierungs-Button (sichtbar solange Editor geschlossen) -->
+        <button id="openEditorBtn" onclick="openImageEditor()"
+            class="absolute top-4 left-4 text-slate-400 hover:text-amber-400 p-2 rounded-full hover:bg-white/10 transition-colors z-10"
+            title="Bild annotieren (Pfeile, Freihand …)">
+            <i class="mdi mdi-pencil" style="font-size:1.75rem;line-height:1"></i>
+        </button>
+
+        <!-- Bildbereich mit Canvas-Overlay -->
+        <div id="previewImageWrapper" class="relative mb-2" style="display:inline-flex; line-height:0;" onclick="event.stopPropagation()">
+            <img id="previewImage" class="max-h-[62vh] max-w-full block rounded-md shadow-2xl" src="" alt="Vorschau" />
+            <canvas id="annotationCanvas"
+                class="hidden absolute inset-0 w-full h-full rounded-md"
+                style="touch-action:none;"></canvas>
+        </div>
+
+        <!-- Annotations-Toolbar (standardmäßig verborgen) -->
+        <div id="annotationToolbar"
+            class="hidden items-center flex-wrap gap-1.5 mb-3 px-3 py-2 bg-zinc-900/95 border border-zinc-700 rounded-xl shadow-xl max-w-[min(700px,95vw)]"
+            onclick="event.stopPropagation()">
+
+            <!-- Werkzeuge -->
+            <div class="flex items-center gap-1 border-r border-zinc-700 pr-2 mr-0.5">
+                <button class="editor-tool-btn p-1.5 rounded border text-xs transition-colors" data-tool="pen"
+                    onclick="setEditorTool('pen')" title="Freihand zeichnen">
+                    <i class="mdi mdi-pencil text-lg"></i>
+                </button>
+                <button class="editor-tool-btn p-1.5 rounded border text-xs transition-colors" data-tool="arrow"
+                    onclick="setEditorTool('arrow')" title="Pfeil">
+                    <i class="mdi mdi-arrow-top-right text-lg"></i>
+                </button>
+                <button class="editor-tool-btn p-1.5 rounded border text-xs transition-colors" data-tool="rect"
+                    onclick="setEditorTool('rect')" title="Rechteck">
+                    <i class="mdi mdi-rectangle-outline text-lg"></i>
+                </button>
+                <button class="editor-tool-btn p-1.5 rounded border text-xs transition-colors" data-tool="circle"
+                    onclick="setEditorTool('circle')" title="Ellipse">
+                    <i class="mdi mdi-ellipse-outline text-lg"></i>
+                </button>
+                <button class="editor-tool-btn p-1.5 rounded border text-xs transition-colors" data-tool="text"
+                    onclick="setEditorTool('text')" title="Text einfügen">
+                    <i class="mdi mdi-format-text text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Farben -->
+            <div class="flex items-center gap-1 border-r border-zinc-700 pr-2 mr-0.5">
+                <button class="editor-color-btn w-5 h-5 rounded-full transition-all flex-none"
+                    data-color="#ef4444" onclick="setEditorColor('#ef4444')" style="background:#ef4444" title="Rot"></button>
+                <button class="editor-color-btn w-5 h-5 rounded-full transition-all flex-none"
+                    data-color="#f97316" onclick="setEditorColor('#f97316')" style="background:#f97316" title="Orange"></button>
+                <button class="editor-color-btn w-5 h-5 rounded-full transition-all flex-none"
+                    data-color="#eab308" onclick="setEditorColor('#eab308')" style="background:#eab308" title="Gelb"></button>
+                <button class="editor-color-btn w-5 h-5 rounded-full transition-all flex-none"
+                    data-color="#22c55e" onclick="setEditorColor('#22c55e')" style="background:#22c55e" title="Grün"></button>
+                <button class="editor-color-btn w-5 h-5 rounded-full transition-all flex-none"
+                    data-color="#3b82f6" onclick="setEditorColor('#3b82f6')" style="background:#3b82f6" title="Blau"></button>
+                <button class="editor-color-btn w-5 h-5 rounded-full transition-all flex-none border border-zinc-500"
+                    data-color="#ffffff" onclick="setEditorColor('#ffffff')" style="background:#ffffff" title="Weiß"></button>
+                <button class="editor-color-btn w-5 h-5 rounded-full transition-all flex-none border border-zinc-600"
+                    data-color="#000000" onclick="setEditorColor('#000000')" style="background:#000000" title="Schwarz"></button>
+                <!-- Freie Farbwahl -->
+                <label class="relative w-5 h-5 rounded-full overflow-hidden cursor-pointer bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-300 flex items-center justify-center flex-none"
+                    title="Eigene Farbe wählen">
+                    <input type="color" id="editorCustomColor" value="#ef4444"
+                        oninput="setEditorColorCustom(this)"
+                        class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+                </label>
+            </div>
+
+            <!-- Strichstärke -->
+            <div class="flex items-center gap-1.5 border-r border-zinc-700 pr-2 mr-0.5">
+                <i class="mdi mdi-format-line-weight text-zinc-400 text-sm"></i>
+                <input type="range" min="1" max="24" value="4"
+                    oninput="setEditorWidth(this.value)"
+                    class="w-20 accent-blue-500 cursor-pointer" />
+                <span id="editorWidthLabel" class="text-zinc-400 text-xs w-7 text-right">4px</span>
+            </div>
+
+            <!-- Aktionen -->
+            <div class="flex items-center gap-1">
+                <button onclick="editorUndo()"
+                    class="p-1.5 rounded border border-zinc-600 text-zinc-400 hover:text-white hover:border-zinc-400 transition-colors"
+                    title="Rückgängig">
+                    <i class="mdi mdi-undo text-lg"></i>
+                </button>
+                <button onclick="editorClear()"
+                    class="p-1.5 rounded border border-zinc-600 text-zinc-400 hover:text-red-400 hover:border-red-600 transition-colors"
+                    title="Alle Annotierungen löschen">
+                    <i class="mdi mdi-delete-outline text-lg"></i>
+                </button>
+                <button onclick="closeImageEditor(false)"
+                    class="px-2.5 py-1 rounded border border-zinc-600 text-zinc-400 hover:text-white hover:border-zinc-400 transition-colors text-xs font-medium"
+                    title="Abbrechen, Annotierungen verwerfen">
+                    Abbrechen
+                </button>
+                <button onclick="closeImageEditor(true)"
+                    class="px-2.5 py-1 rounded border border-emerald-600 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-200 transition-colors text-xs font-semibold"
+                    title="Annotierungen dauerhaft ins Bild einbrennen">
+                    <i class="mdi mdi-check"></i> Übernehmen
+                </button>
+            </div>
+        </div>
+
+        <!-- Dateiinfo-Panel -->
         <div class="text-center w-full max-w-2xl bg-zinc-900 border border-zinc-800 p-4 rounded-lg shadow-xl cursor-default"
             onclick="event.stopPropagation()">
             <div id="previewNewName" class="text-blue-400 font-mono text-base md:text-lg font-bold truncate mb-1.5">
@@ -300,10 +479,26 @@
         </div>
     </div>
 
-    <script src="standorte.js"></script>
-    <script src="site-2d.js"></script>
+    <script src="js/standorte.js"></script>
+    <script src="js/site-2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
-    <script src="app.js"></script>
+    <!-- App-Module (Ladereihenfolge beachten) -->
+    <script src="js/utils.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/tabs.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/categories.js"></script>
+    <script src="js/file-ingestion.js"></script>
+    <script src="js/undo.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/save.js"></script>
+    <script src="js/divider.js"></script>
+    <script src="js/image-editor.js"></script>
+    <script src="js/app.js"></script>
 
 </body>
 
