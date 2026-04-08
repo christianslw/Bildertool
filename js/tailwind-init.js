@@ -2,8 +2,33 @@ tailwind.config = {
     darkMode: 'class',
     theme: {
         extend: {
-            fontFamily: { sans: ['Segoe UI', 'system-ui', 'sans-serif'] },
-            colors: { oled: '#000000', zinc: { 900: '#18181b', 950: '#09090b' } }
+            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+            colors: {
+                oled: '#000000',
+                zinc: { 900: '#18181b', 950: '#09090b' },
+                token: {
+                    bg:        'var(--color-bg)',
+                    surface:   'var(--color-surface)',
+                    border:    'var(--color-border)',
+                    accent:    'var(--color-accent)',
+                    muted:     'var(--color-text-muted)',
+                }
+            },
+            borderRadius: {
+                'token-sm': 'var(--radius-sm)',
+                'token-md': 'var(--radius-md)',
+                'token-lg': 'var(--radius-lg)',
+                'token-xl': 'var(--radius-xl)',
+            },
+            boxShadow: {
+                'token-sm': 'var(--shadow-sm)',
+                'token-md': 'var(--shadow-md)',
+                'token-lg': 'var(--shadow-lg)',
+                'token-xl': 'var(--shadow-xl)',
+            },
+            transitionTimingFunction: {
+                'spring': 'cubic-bezier(0.175,0.885,0.32,1.275)',
+            }
         }
     }
 };

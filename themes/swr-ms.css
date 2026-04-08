@@ -3,6 +3,57 @@
    CSS class: "swr-ms" on <html>
    =================================================================== */
 
+/* --- Canonical Design Tokens --- */
+html.swr-ms:not(.dark) {
+    --color-bg:             #f4f6f9;
+    --color-bg-alt:         #e8edf5;
+    --color-surface:        #ffffff;
+    --color-surface-raised: #ffffff;
+    --color-border:         #e2e8f0;
+    --color-border-subtle:  #f1f5f9;
+    --color-text-primary:   #0f172a;
+    --color-text-secondary: #334155;
+    --color-text-muted:     #64748b;
+    --color-accent:         #003366;
+    --color-accent-hover:   #002244;
+    --color-accent-subtle:  #e6f0fa;
+    --color-destructive:    #dc2626;
+    --color-warning:        #cc8400;
+    --color-success:        #166534;
+    --color-highlight:      rgba(0,51,102,0.08);
+    --radius-sm:   2px;
+    --radius-md:   2px;
+    --radius-lg:   4px;
+    --radius-xl:   4px;
+    --glass-bg:             rgba(244,246,249,0.92);
+    --glass-border:         rgba(226,232,240,0.80);
+}
+
+html.swr-ms.dark {
+    --color-bg:             #0c1524;
+    --color-bg-alt:         #0e1a2e;
+    --color-surface:        #152238;
+    --color-surface-raised: #1e3050;
+    --color-border:         #273959;
+    --color-border-subtle:  #152238;
+    --color-text-primary:   #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted:     #94a3b8;
+    --color-accent:         #4da6ff;
+    --color-accent-hover:   #80bfff;
+    --color-accent-subtle:  rgba(0,51,102,0.25);
+    --color-destructive:    #ef4444;
+    --color-warning:        #ffb833;
+    --color-success:        #4ade80;
+    --color-highlight:      rgba(0,68,136,0.20);
+    --radius-sm:   2px;
+    --radius-md:   2px;
+    --radius-lg:   4px;
+    --radius-xl:   4px;
+    --glass-bg:             rgba(12,21,36,0.92);
+    --glass-border:         rgba(39,57,89,0.70);
+}
+
 /* Light Mode Base Context */
 html.swr-ms body { background-color: #f4f6f9 !important; }
 

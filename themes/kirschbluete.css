@@ -3,6 +3,57 @@
    CSS class: "kirschbluete" on <html>
    =================================================================== */
 
+/* --- Canonical Design Tokens --- */
+html.kirschbluete:not(.dark) {
+    --color-bg:             #fff4f8;
+    --color-bg-alt:         #ffe8f0;
+    --color-surface:        #ffffff;
+    --color-surface-raised: #ffffff;
+    --color-border:         #fce6ed;
+    --color-border-subtle:  #fff4f8;
+    --color-text-primary:   #3b252b;
+    --color-text-secondary: #5c434b;
+    --color-text-muted:     #b8a2a9;
+    --color-accent:         #e88ba4;
+    --color-accent-hover:   #d1748d;
+    --color-accent-subtle:  #fef0f4;
+    --color-destructive:    #d66b86;
+    --color-warning:        #c97b3c;
+    --color-success:        #70a87a;
+    --color-highlight:      rgba(232,139,164,0.12);
+    --radius-sm:   8px;
+    --radius-md:   12px;
+    --radius-lg:   16px;
+    --radius-xl:   22px;
+    --glass-bg:             rgba(255,244,248,0.85);
+    --glass-border:         rgba(252,230,237,0.70);
+}
+
+html.kirschbluete.dark {
+    --color-bg:             #0d0814;
+    --color-bg-alt:         #150a1e;
+    --color-surface:        #1a1224;
+    --color-surface-raised: #241933;
+    --color-border:         #3b264d;
+    --color-border-subtle:  #1a1224;
+    --color-text-primary:   #fff0f5;
+    --color-text-secondary: #ffb8d2;
+    --color-text-muted:     #c48eab;
+    --color-accent:         #ff3377;
+    --color-accent-hover:   #ff6699;
+    --color-accent-subtle:  rgba(255,51,119,0.14);
+    --color-destructive:    #ff6699;
+    --color-warning:        #f4a93d;
+    --color-success:        #7bcf8a;
+    --color-highlight:      rgba(255,51,119,0.12);
+    --radius-sm:   8px;
+    --radius-md:   12px;
+    --radius-lg:   16px;
+    --radius-xl:   22px;
+    --glass-bg:             rgba(13,8,20,0.88);
+    --glass-border:         rgba(59,38,77,0.60);
+}
+
 html.kirschbluete body {
     position: relative;
     overflow-x: hidden;

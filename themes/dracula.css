@@ -3,7 +3,50 @@
    CSS class: "dracula" on <html>
    =================================================================== */
 
-/* --- CSS Variables --- */
+/* --- Canonical Design Tokens --- */
+html.dracula:not(.dark) {
+    --color-bg:             #f4f4f8;
+    --color-bg-alt:         #e9e9f0;
+    --color-surface:        #ffffff;
+    --color-surface-raised: #ffffff;
+    --color-border:         #d1cde0;
+    --color-border-subtle:  #e9e9f0;
+    --color-text-primary:   #1f1e29;
+    --color-text-secondary: #3b3947;
+    --color-text-muted:     #5a576b;
+    --color-accent:         #00a878;
+    --color-accent-hover:   #20c997;
+    --color-accent-subtle:  rgba(0,168,120,0.12);
+    --color-destructive:    #d32f2f;
+    --color-warning:        #f08c00;
+    --color-success:        #00a878;
+    --color-highlight:      rgba(0,168,120,0.12);
+    --glass-bg:             rgba(244,244,248,0.85);
+    --glass-border:         rgba(209,205,224,0.50);
+}
+
+html.dracula.dark {
+    --color-bg:             #140e1a;
+    --color-bg-alt:         #100b15;
+    --color-surface:        #191120;
+    --color-surface-raised: #221830;
+    --color-border:         #3b334b;
+    --color-border-subtle:  #140e1a;
+    --color-text-primary:   #edecee;
+    --color-text-secondary: #cdccce;
+    --color-text-muted:     #64548e;
+    --color-accent:         #61ffca;
+    --color-accent-hover:   #8effd9;
+    --color-accent-subtle:  rgba(61,55,94,0.5);
+    --color-destructive:    #ff6767;
+    --color-warning:        #ffca85;
+    --color-success:        #61ffca;
+    --color-highlight:      rgba(61,55,94,0.5);
+    --glass-bg:             rgba(20,14,26,0.90);
+    --glass-border:         rgba(59,51,75,0.60);
+}
+
+/* --- CSS Variables (theme-specific palette) --- */
 html.dracula:not(.dark) {
 	--primary: #9b51e0;
 	--primary-light: #b070f0;

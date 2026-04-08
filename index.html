@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Standort Foto Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind-init.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
@@ -16,7 +19,7 @@
 
     <!-- Navbar / Header -->
     <div
-        class="px-4 md:px-8 py-3 flex justify-between items-center border-b border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+        class="px-4 md:px-8 py-3 flex justify-between items-center border-b border-slate-200 dark:border-zinc-800 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm shadow-[var(--shadow-sm)] sticky top-0 z-10">
         <h1 class="text-xl font-semibold flex items-center gap-2 truncate">
                     <svg class="h-7 w-auto shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 815 240" style="overflow:hidden">
                         <!-- Arrows rendered first so letters layer on top while they emerge -->
@@ -35,44 +38,39 @@
                     </svg>
                     <span class="truncate swr-title">Foto-Tool</span>
         </h1>
-        <div class="flex items-center gap-4">
-            <button onclick="openSettings()"
-                class="p-2 text-slate-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800"
-                title="Einstellungen">
-                <i class="mdi mdi-cog text-xl"></i>
-            </button>
-        </div>
     </div>
 
     <!-- Main Content App -->
     <div
-        class="flex-1 flex flex-col md:flex-row overflow-hidden mx-4 md:mx-8 my-4 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-md shadow-sm">
+        class="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden mx-4 md:mx-8 my-4 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl shadow-[var(--shadow-md)]">
 
         <!-- Linke Seite (Kategorien & Standort) -->
         <div id="categoriesPanel"
-            class="w-full md:flex-none p-4 border-b md:border-b-0 border-slate-200 dark:border-zinc-800 flex flex-col bg-slate-50/30 dark:bg-zinc-900/30 overflow-hidden">
-            <div class="mb-2">
-                <!-- Standort Suche (manuell; normalerweise per GPS automatisch) -->
-                <div class="relative">
-                    <label class="block text-[10px] font-medium text-slate-400 dark:text-zinc-500 mb-1">Standort <span class="font-normal italic">· optional, wird per GPS erkannt</span></label>
-                    <div class="relative flex items-center">
-                        <i class="mdi mdi-magnify absolute left-2.5 text-slate-300 dark:text-zinc-600 text-sm"></i>
-                        <input type="text" id="standortSelect" placeholder="Name oder Nummer suchen..." autocomplete="off"
-                            class="w-full py-1 pl-8 pr-8 text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded focus:outline-none focus:border-blue-400 transition-colors text-slate-600 dark:text-zinc-300" />
-                        <button type="button" id="clearSearchBtn"
-                            class="absolute right-2 text-slate-300 dark:text-zinc-600 hover:text-red-400 hidden" title="Suche löschen">
-                            <i class="mdi mdi-close text-sm"></i>
-                        </button>
+            class="w-full md:flex-none border-b md:border-b-0 border-slate-200 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-900/30 overflow-hidden">
+            <!-- 80% scale inner wrapper; 125% compensates the transform shrink so it fills the panel -->
+            <div class="categories-scale-inner">
+                <div class="mb-2">
+                    <!-- Standort Suche (manuell; normalerweise per GPS automatisch) -->
+                    <div class="relative">
+                        <label class="block text-[10px] font-medium text-slate-400 dark:text-zinc-500 mb-1">Standort <span class="font-normal italic">· optional, wird per GPS erkannt</span></label>
+                        <div class="relative flex items-center">
+                            <i class="mdi mdi-magnify absolute left-2.5 text-slate-300 dark:text-zinc-600 text-sm"></i>
+                            <input type="text" id="standortSelect" placeholder="Name oder Nummer suchen..." autocomplete="off"
+                                class="w-full py-1 pl-8 pr-8 text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded focus:outline-none focus:border-blue-400 transition-colors text-slate-600 dark:text-zinc-300" />
+                            <button type="button" id="clearSearchBtn"
+                                class="absolute right-2 text-slate-300 dark:text-zinc-600 hover:text-red-400 hidden" title="Suche löschen">
+                                <i class="mdi mdi-close text-sm"></i>
+                            </button>
+                        </div>
+                        <div id="standortDropdown" class="custom-dropdown hidden w-full mt-1"></div>
                     </div>
-                    <div id="standortDropdown" class="custom-dropdown hidden w-full mt-1"></div>
                 </div>
-            </div>
 
-
-            <!-- Context Panel (Full Category Tree) -->
-            <div id="context-panel" class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col shadow-sm transition-all duration-300 overflow-y-auto">
-                <h3 id="context-title" class="font-bold text-base text-slate-800 dark:text-zinc-100 mb-3 flex items-center gap-2">Bauteile & Kategorien</h3>
-                <div id="context-chips" class="flex flex-col gap-2 content-start"></div>
+                <!-- Context Panel (Full Category Tree) -->
+                <div id="context-panel" class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col shadow-[var(--shadow-md)] transition-all duration-300 overflow-y-auto">
+                    <h3 id="context-title" class="hidden text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-zinc-500 mb-2 flex items-center gap-1.5"></h3>
+                    <div id="context-chips" class="flex flex-col gap-2 content-start"></div>
+                </div>
             </div>
         </div>
 
@@ -88,20 +86,20 @@
             </div>
             <!-- Toolbar -->
             <div
-                class="p-3 md:p-4 border-b border-slate-200 dark:border-zinc-800 flex flex-wrap gap-3 justify-between items-center bg-slate-50/50 dark:bg-zinc-900/50">
-                <div class="flex flex-wrap items-center gap-3 md:gap-4">
+                class="px-3 py-1.5 border-b border-slate-200 dark:border-zinc-800 flex gap-2 justify-between items-center bg-slate-50/50 dark:bg-zinc-900/50 shrink-0">
+                <div class="flex items-center gap-2 min-w-0">
 
                     <!-- Speichern Split-Button -->
-                    <div class="relative inline-flex items-center shadow-sm">
+                    <div class="relative inline-flex items-center shadow-[var(--shadow-sm)] shrink-0">
                         <button id="mainSaveBtn"
-                            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors flex items-center gap-2 text-sm"
+                            class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-l-lg font-medium transition-all duration-150 flex items-center gap-1.5 text-xs hover:shadow-[0_0_12px_rgba(37,99,235,0.35)] focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none"
                             title="Bilder abspeichern">
-                            Alle speichern
+                            <i class="mdi mdi-content-save text-sm"></i> Speichern
                         </button>
                         <button id="saveDropdownTrigger"
-                            class="px-2 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-r-md border-l border-blue-800 transition-colors hidden"
+                            class="hidden px-1.5 py-1 bg-blue-700 hover:bg-blue-800 text-white rounded-r-lg border-l border-blue-800 transition-all duration-150"
                             title="Weitere Speicheroptionen">
-                            <i class="mdi mdi-chevron-down text-base"></i>
+                            <i class="mdi mdi-chevron-down text-sm"></i>
                         </button>
                         <div id="saveDropdownMenu"
                             class="custom-dropdown hidden absolute left-0 top-full mt-1 w-48 text-sm py-1 z-[51]">
@@ -113,45 +111,39 @@
                         </div>
                     </div>
 
-                    <div class="h-6 w-px bg-slate-300 dark:bg-zinc-700 hidden sm:block"></div>
+                    <div class="h-5 w-px bg-slate-300 dark:bg-zinc-700 shrink-0"></div>
 
                     <!-- Checkbox Komprimieren -->
                     <label
-                        class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-zinc-300 cursor-pointer select-none"
+                        class="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-zinc-300 cursor-pointer select-none shrink-0"
                         title="Beim Speichern die Dateigröße reduzieren">
                         <input type="checkbox" id="compressCheck"
-                            class="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-zinc-900 focus:ring-2 dark:bg-zinc-950 dark:border-zinc-700">
-                        Komprimieren
+                            class="w-3.5 h-3.5 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-zinc-900 focus:ring-2 dark:bg-zinc-950 dark:border-zinc-700">
+                        Komp.
                     </label>
 
-                    <!-- Schnellimport -->
-                    <button id="quickImportBtn"
-                        class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-900/20 dark:hover:border-blue-800 dark:hover:text-blue-400 text-slate-500 dark:text-zinc-400 rounded-md transition-colors"
-                        title="Dateien / Ordner importieren (ohne Kategorie)">
-                        <i class="mdi mdi-upload text-base"></i>
-                    </button>
+                    <div class="h-5 w-px bg-slate-300 dark:bg-zinc-700 shrink-0"></div>
+
                     <button id="undoBtn" disabled
-                        class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-500 dark:text-zinc-400 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        class="p-1 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-500 dark:text-zinc-400 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                         title="Rükgängig (Strg+Z)">
-                        <i class="mdi mdi-undo text-base"></i>
+                        <i class="mdi mdi-undo text-sm"></i>
                     </button>
                     <button id="redoBtn" disabled
-                        class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-500 dark:text-zinc-400 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        class="p-1 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-500 dark:text-zinc-400 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                         title="Wiederholen (Strg+Y)">
-                        <i class="mdi mdi-redo text-base"></i>
+                        <i class="mdi mdi-redo text-sm"></i>
                     </button>
-
                     <button id="clearAll"
-                        class="p-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:border-red-800 dark:hover:text-red-400 text-slate-500 dark:text-zinc-400 rounded-md transition-colors"
+                        class="p-1 bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:border-red-800 dark:hover:text-red-400 text-slate-500 dark:text-zinc-400 rounded-md transition-colors shrink-0"
                         title="Liste leeren">
-                        <i class="mdi mdi-delete text-base"></i>
+                        <i class="mdi mdi-delete text-sm"></i>
                     </button>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 shrink-0">
                     <span id="status"
-                        class="text-xs text-slate-500 dark:text-zinc-400 font-medium truncate max-w-[120px] sm:max-w-[180px]">0
-                        Dateien</span>
+                        class="text-xs text-slate-500 dark:text-zinc-400 font-medium truncate max-w-[80px]">0 Dateien</span>
                     <!-- Filter / Sort / Group Dropdown -->
 <div class="relative">
                         <button id="filterDropdownTrigger"
@@ -223,11 +215,65 @@
                 </div>
             </div>
 
-            <div class="view-container flex-1 p-4 overflow-y-auto" id="fileListContainer">
-                <!-- File List / Gallery JS -->
+            <!-- File area wrapper: positions drop zone over list only -->
+            <div class="flex-1 relative overflow-hidden">
+                <!-- Empty Drop Zone — always in DOM, shown when list is empty -->
+                <div id="emptyDropZone" class="empty-drop-zone"
+                    onclick="document.getElementById('fileInput').click()"
+                    ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                    ondragleave="if(!this.contains(event.relatedTarget)) this.classList.remove('drag-over')"
+                    ondrop="event.preventDefault(); event.stopPropagation(); this.classList.remove('drag-over'); if(event.dataTransfer.files.length){ processFiles(event.dataTransfer.files, state.currentTarget || {oberkategorie:null,unterkategorie:''}); }">
+                    <i class="mdi mdi-tray-arrow-down empty-drop-zone__icon"></i>
+                    <p class="empty-drop-zone__title">Bilder hierher ziehen</p>
+                    <p class="empty-drop-zone__sub">oder klicken, um Dateien auszuwählen</p>
+                </div>
+
+                <div class="view-container h-full p-4 overflow-y-auto" id="fileListContainer">
+                    <!-- File List / Gallery JS -->
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="shrink-0 px-4 md:px-8 py-2 flex justify-between items-center border-t border-slate-200 dark:border-zinc-800 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm z-10">
+        <span class="text-[11px] text-slate-400 dark:text-zinc-600 select-none">Foto-Tool</span>
+        <div class="flex items-center gap-1 relative">
+            <!-- Theme Context Menu (pops up above footer) -->
+            <div id="themeContextMenu" class="hidden absolute bottom-full right-0 mb-2 w-72 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white/96 dark:bg-zinc-900/96 backdrop-blur-md shadow-[var(--shadow-xl)] p-3">
+                <div class="mb-3">
+                    <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 mb-2">Aussehen</div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button id="btn-appearance-light" onclick="changeAppearance('light')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Hell</button>
+                        <button id="btn-appearance-dark" onclick="changeAppearance('dark')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dunkel</button>
+                        <button id="btn-appearance-system" onclick="changeAppearance('system')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">System</button>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 mb-2">Farbschema</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btn-theme-standard" onclick="changeColorTheme('standard')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Standard</button>
+                        <button id="btn-theme-dracula" onclick="changeColorTheme('dracula')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dracula</button>
+                        <button id="btn-theme-dracula-laser" onclick="changeColorTheme('dracula-laser')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dracula Laser</button>
+                        <button id="btn-theme-kirschbluete" onclick="changeColorTheme('kirschbluete')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Kirschblüte</button>
+                        <button id="btn-theme-swr-ms" onclick="changeColorTheme('swr-ms')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors col-span-2">SWR MS</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Settings -->
+            <button onclick="openSettings()"
+                class="p-1.5 text-slate-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800"
+                title="Einstellungen">
+                <i class="mdi mdi-cog text-lg"></i>
+            </button>
+            <!-- Theme -->
+            <button id="themeMenuToggle"
+                class="p-1.5 text-slate-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800"
+                title="Design-Menü öffnen" onclick="toggleThemeContextMenu(event)">
+                <i class="mdi mdi-palette text-lg"></i>
+            </button>
+        </div>
+    </footer>
 
     <input id="fileInput" type="file" accept="image/jpeg,.jpg,.jpeg,image/heic,image/heif,.heic,.heif" multiple hidden />
     <input id="folderInput" type="file" accept="image/jpeg,.jpg,.jpeg,image/heic,image/heif,.heic,.heif" webkitdirectory multiple hidden />
@@ -239,15 +285,14 @@
     <div id="settingsModal"
         class="fixed inset-0 bg-slate-900/50 dark:bg-black/80 z-[60] hidden flex items-center justify-center p-4">
         <div
-            class="bg-white dark:bg-zinc-900 rounded-md shadow-xl w-full max-w-xl border border-slate-200 dark:border-zinc-700 overflow-hidden flex flex-col">
-            <div
-                class="p-4 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center bg-slate-50 dark:bg-zinc-950">
+            class="bg-white dark:bg-zinc-900 rounded-xl shadow-[var(--shadow-xl)] w-full max-w-xl border border-slate-200 dark:border-zinc-700 overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center bg-slate-50/80 dark:bg-zinc-950/80">
                 <h3 class="font-semibold text-slate-900 dark:text-zinc-100">Einstellungen</h3>
                 <button onclick="closeSettings()"
-                    class="text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200"><i class="mdi mdi-close text-xl"></i></button>
+                    class="text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200 p-1 rounded-md transition-colors hover:bg-slate-100 dark:hover:bg-zinc-800"><i class="mdi mdi-close text-xl"></i></button>
             </div>
             <div class="p-4 md:p-5 flex-1 overflow-y-auto space-y-4">
-                <div class="rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 p-3">
+                <div class="rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 p-3">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <h4 class="text-sm font-semibold text-slate-900 dark:text-zinc-100">Konfigurationsdatei</h4>
@@ -255,14 +300,14 @@
                         </div>
                         <div class="flex gap-2 shrink-0">
                             <button id="chooseConfigFileBtn"
-                                class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded text-xs font-medium transition-colors">Anderen Ort wählen</button>
+                                class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded-lg text-xs font-medium transition-all">Anderen Ort wählen</button>
                             <button id="reloadConfigFileBtn"
-                                class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded text-xs font-medium transition-colors">Neu laden</button>
+                                class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded-lg text-xs font-medium transition-all">Neu laden</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 p-3">
+                <div class="rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 p-3">
                     <h4 class="text-sm font-semibold text-slate-900 dark:text-zinc-100 mb-2">Standort-Automatik</h4>
                     <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300 cursor-pointer mb-2 select-none">
                         <input type="checkbox" id="autoGpsToggle" checked class="w-4 h-4 accent-blue-600">
@@ -278,9 +323,9 @@
                     <h4 class="text-sm font-semibold text-slate-900 dark:text-zinc-100 mb-3">Kommentar-Vorschläge</h4>
                     <div class="flex gap-2 mb-4">
                         <input type="text" id="newSuggestionInput" placeholder="Neuer Vorschlag (z.B. Vodafone)"
-                            class="flex-1 p-2 rounded-md border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 focus:border-blue-500 outline-none text-sm">
+                            class="flex-1 p-2 rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 focus:border-blue-500 outline-none text-sm">
                         <button onclick="addSuggestion()"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors">Hinzufügen</button>
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all hover:shadow-[0_0_10px_rgba(37,99,235,0.30)]">Hinzufügen</button>
                     </div>
                     <div id="suggestionsList"
                         class="flex flex-col gap-2 border border-slate-200 dark:border-zinc-800 rounded-md p-2 bg-slate-50 dark:bg-zinc-950 max-h-64 overflow-y-auto">
@@ -291,49 +336,22 @@
         </div>
     </div>
 
-    <div class="fixed right-4 bottom-4 z-[65] flex flex-col items-end gap-2">
-        <div id="themeContextMenu" class="hidden w-72 rounded-md border border-slate-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 backdrop-blur shadow-xl p-3">
-            <div class="mb-3">
-                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 mb-2">Aussehen</div>
-                <div class="grid grid-cols-3 gap-2">
-                    <button id="btn-appearance-light" onclick="changeAppearance('light')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Hell</button>
-                    <button id="btn-appearance-dark" onclick="changeAppearance('dark')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dunkel</button>
-                    <button id="btn-appearance-system" onclick="changeAppearance('system')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">System</button>
-                </div>
-            </div>
-            <div>
-                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 mb-2">Farbschema</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button id="btn-theme-standard" onclick="changeColorTheme('standard')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Standard</button>
-                    <button id="btn-theme-dracula" onclick="changeColorTheme('dracula')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dracula</button>
-                    <button id="btn-theme-dracula-laser" onclick="changeColorTheme('dracula-laser')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Dracula Laser</button>
-                    <button id="btn-theme-kirschbluete" onclick="changeColorTheme('kirschbluete')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Kirschblüte</button>
-                    <button id="btn-theme-swr-ms" onclick="changeColorTheme('swr-ms')" class="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors col-span-2">SWR MS</button>
-                </div>
-            </div>
-        </div>
 
-        <button id="themeMenuToggle"
-            class="p-2 rounded-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-md text-slate-600 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-400 transition-colors"
-            title="Design-Menü öffnen" onclick="toggleThemeContextMenu(event)">
-            <i class="mdi mdi-palette text-xl"></i>
-        </button>
-    </div>
 
     <!-- TOAST CONTAINER -->
-    <div id="toastContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none"></div>
+    <div id="toastContainer" class="fixed bottom-14 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none"></div>
 
     <!-- PROMPT MODAL -->
     <div id="promptModal" class="fixed inset-0 bg-slate-900/50 dark:bg-black/80 z-[80] hidden items-center justify-center p-4">
-        <div class="bg-white dark:bg-zinc-900 rounded-md shadow-xl w-full max-w-sm border border-slate-200 dark:border-zinc-700 overflow-hidden">
-            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950">
+        <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-[var(--shadow-xl)] w-full max-w-sm border border-slate-200 dark:border-zinc-700 overflow-hidden">
+            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/80 dark:bg-zinc-950/80">
                 <h3 id="promptModalTitle" class="font-semibold text-slate-900 dark:text-zinc-100 text-sm"></h3>
             </div>
             <div class="p-4">
                 <input type="text" id="promptModalInput" class="w-full p-2 rounded-md border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 focus:border-blue-500 outline-none text-sm mb-4" />
                 <div class="flex justify-end gap-2">
-                    <button id="promptModalCancel" class="px-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Abbrechen</button>
-                    <button id="promptModalConfirm" class="px-3 py-1.5 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors">OK</button>
+                    <button id="promptModalCancel" class="px-3 py-1.5 text-sm rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all">Abbrechen</button>
+                    <button id="promptModalConfirm" class="px-3 py-1.5 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all hover:shadow-[0_0_10px_rgba(37,99,235,0.30)]">OK</button>
                 </div>
             </div>
         </div>
@@ -341,15 +359,15 @@
 
     <!-- CONFIRM MODAL -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/50 dark:bg-black/80 z-[80] hidden items-center justify-center p-4">
-        <div class="bg-white dark:bg-zinc-900 rounded-md shadow-xl w-full max-w-sm border border-slate-200 dark:border-zinc-700 overflow-hidden">
-            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950">
+        <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-[var(--shadow-xl)] w-full max-w-sm border border-slate-200 dark:border-zinc-700 overflow-hidden">
+            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/80 dark:bg-zinc-950/80">
                 <h3 class="font-semibold text-slate-900 dark:text-zinc-100 text-sm">Bestätigung</h3>
             </div>
             <div class="p-4">
                 <p id="confirmModalMessage" class="text-sm text-slate-700 dark:text-zinc-300 mb-4"></p>
                 <div class="flex justify-end gap-2">
-                    <button id="confirmModalCancel" class="px-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Abbrechen</button>
-                    <button id="confirmModalOk" class="px-3 py-1.5 text-sm rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition-colors">Löschen</button>
+                    <button id="confirmModalCancel" class="px-3 py-1.5 text-sm rounded-lg border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all">Abbrechen</button>
+                    <button id="confirmModalOk" class="px-3 py-1.5 text-sm rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-all hover:shadow-[0_0_10px_rgba(220,38,38,0.30)]">Löschen</button>
                 </div>
             </div>
         </div>
@@ -462,7 +480,7 @@
                     Abbrechen
                 </button>
                 <button onclick="closeImageEditor(true)"
-                    class="px-2.5 py-1 rounded border border-emerald-600 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-200 transition-colors text-xs font-semibold"
+                    class="px-2.5 py-1 rounded-lg border border-emerald-600 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-200 transition-all text-xs font-semibold"
                     title="Annotierungen dauerhaft ins Bild einbrennen">
                     <i class="mdi mdi-check"></i> Übernehmen
                 </button>
@@ -470,7 +488,7 @@
         </div>
 
         <!-- Dateiinfo-Panel -->
-        <div class="text-center w-full max-w-2xl bg-zinc-900 border border-zinc-800 p-4 rounded-lg shadow-xl cursor-default"
+        <div class="text-center w-full max-w-2xl bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl shadow-[var(--shadow-xl)] backdrop-blur-sm cursor-default"
             onclick="event.stopPropagation()">
             <div id="previewNewName" class="text-blue-400 font-mono text-base md:text-lg font-bold truncate mb-1.5">
             </div>

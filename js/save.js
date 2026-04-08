@@ -121,6 +121,23 @@ async function processSaveLoop(baseHandle, fileList = null) {
         return cleaned || 'Unbekannt';
     };
 
+    const REGION_FOLDERS = {
+        1: '1000_Bereich Koblenz',
+        2: '2000_Bereich Haardtkopf',
+        3: '3000_Bereich Donnersberg',
+        4: '4000_Bereich Hornisgrinde',
+        5: '5000_Bereich Bodensee',
+        6: '6000_Bereich Feldberg',
+        7: '7000_Temporäre Standorte',
+        8: '8000_Bereich Stuttgart',
+        9: '9000_Bereich Mühlacker',
+    };
+
+    const getRegionFolderName = (nummer) => {
+        const firstDigit = parseInt(String(nummer || '0').trim().charAt(0), 10);
+        return REGION_FOLDERS[firstDigit] || sanitizeFolderSegment(`${firstDigit}000_Bereich Unbekannt`);
+    };
+
     const getStandortNameByNummer = (nummer) => {
         if (typeof standorteDaten === 'undefined' || !Array.isArray(standorteDaten)) return '';
         const match = standorteDaten.find(entry => String(entry?.nummer || '').padStart(4, '0') === nummer);
@@ -145,10 +162,11 @@ async function processSaveLoop(baseHandle, fileList = null) {
 
     for (const item of filesToSave) {
         const isCompressing = item.compress !== undefined ? item.compress : DOM.compressCheck.checked;
+        const regionFolder = getRegionFolderName(item?.standort);
         const standortFolder = getStandortFolderName(item);
         const folderName = item.oberkategorie;
-        const basePathKey = `${standortFolder}/${folderName}`;
-        const compressedPathKey = `${standortFolder}/_komprimiert/${folderName}`;
+        const basePathKey = `${regionFolder}/${standortFolder}/${folderName}`;
+        const compressedPathKey = `${regionFolder}/${standortFolder}/_komprimiert/${folderName}`;
         const finalNameOriginal = getUniqueName(basePathKey, buildName(item));
         const finalNameCompressed = isCompressing
             ? getUniqueName(compressedPathKey, buildName(item))
@@ -158,7 +176,8 @@ async function processSaveLoop(baseHandle, fileList = null) {
         const compressedData = isCompressing ? await compressToUnder1MB(item.originalFile) : null;
 
         if (baseHandle) {
-            const standortDir = await baseHandle.getDirectoryHandle(standortFolder, { create: true });
+            const regionDir = await baseHandle.getDirectoryHandle(regionFolder, { create: true });
+            const standortDir = await regionDir.getDirectoryHandle(standortFolder, { create: true });
 
             const originalCategoryDir = await standortDir.getDirectoryHandle(folderName, { create: true });
             const originalFileHandle = await originalCategoryDir.getFileHandle(finalNameOriginal, { create: true });
@@ -177,14 +196,14 @@ async function processSaveLoop(baseHandle, fileList = null) {
         } else {
             const originalDownload = document.createElement("a");
             originalDownload.href = item.objectUrl;
-            originalDownload.download = `${standortFolder}_${folderName}_${finalNameOriginal}`;
+            originalDownload.download = `${regionFolder}_${standortFolder}_${folderName}_${finalNameOriginal}`;
             originalDownload.click();
 
             if (isCompressing && compressedData) {
                 const compressedUrl = URL.createObjectURL(compressedData);
                 const compressedDownload = document.createElement("a");
                 compressedDownload.href = compressedUrl;
-                compressedDownload.download = `${standortFolder}_komprimiert_${folderName}_${finalNameCompressed}`;
+                compressedDownload.download = `${regionFolder}_${standortFolder}_komprimiert_${folderName}_${finalNameCompressed}`;
                 compressedDownload.click();
                 setTimeout(() => URL.revokeObjectURL(compressedUrl), 1500);
             }

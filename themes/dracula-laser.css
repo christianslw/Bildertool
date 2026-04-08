@@ -3,7 +3,50 @@
    CSS class: "dracula-laser" on <html>
    =================================================================== */
 
-/* --- CSS Variables --- */
+/* --- Canonical Design Tokens --- */
+html.dracula-laser:not(.dark) {
+    --color-bg:             #f5f4f8;
+    --color-bg-alt:         #eae8f0;
+    --color-surface:        #ffffff;
+    --color-surface-raised: #ffffff;
+    --color-border:         #d1cde0;
+    --color-border-subtle:  #eae8f0;
+    --color-text-primary:   #1f1e29;
+    --color-text-secondary: #3b3947;
+    --color-text-muted:     #5a576b;
+    --color-accent:         #d91a6e;
+    --color-accent-hover:   #f92883;
+    --color-accent-subtle:  rgba(249,40,131,0.10);
+    --color-destructive:    #e05545;
+    --color-warning:        #e6be00;
+    --color-success:        #00cc7a;
+    --color-highlight:      rgba(249,40,131,0.10);
+    --glass-bg:             rgba(245,244,248,0.85);
+    --glass-border:         rgba(209,205,224,0.50);
+}
+
+html.dracula-laser.dark {
+    --color-bg:             #140e1a;
+    --color-bg-alt:         #100b15;
+    --color-surface:        #191120;
+    --color-surface-raised: #221830;
+    --color-border:         #2e206a;
+    --color-border-subtle:  #140e1a;
+    --color-text-primary:   #f1f1f1;
+    --color-text-secondary: #d1d1fe;
+    --color-text-muted:     #8f8f8f;
+    --color-accent:         #f92883;
+    --color-accent-hover:   #ff4da2;
+    --color-accent-subtle:  rgba(46,32,106,0.6);
+    --color-destructive:    #ff8373;
+    --color-warning:        #fed300;
+    --color-success:        #00ff9c;
+    --color-highlight:      rgba(46,32,106,0.5);
+    --glass-bg:             rgba(20,14,26,0.90);
+    --glass-border:         rgba(46,32,106,0.60);
+}
+
+/* --- CSS Variables (theme-specific palette) --- */
 html.dracula-laser:not(.dark) {
 	--primary: #d91a6e;
 	--primary-light: #f92883;

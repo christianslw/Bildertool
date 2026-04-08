@@ -8,7 +8,7 @@
   
     // Konstanten & Farben für das Line-Art Design
     const STROKE_COLOR = '#1e293b'; // Dunkles Schiefergrau
-    const ACCENT_COLOR = '#3b82f6'; // Blau für Hover/Aktiv
+    const ACCENT_COLOR = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#3b82f6'; // theme-aware
     const DROP_COLOR = '#10b981';   // Grün für Drop
     const BG_FILL = '#ffffff';      // Für Verdeckungen (Occlusion)
     const STROKE_WIDTH = 2;

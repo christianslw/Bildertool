@@ -256,7 +256,8 @@ function createCategoryDropBox(cat, sub, onChangeCallback) {
     }
 
     const boxLabel = isMainCategory ? cat.label : sub;
-    const paletteColor = normalizeHexColor(cat.color) || '#64748b';
+    const paletteColor = normalizeHexColor(cat.color) ||
+        getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim() || '#64748b';
     let boxHtml = `
         <div class="flex items-center justify-between gap-2">
             <div class="min-w-0 flex items-center gap-1.5">
@@ -305,7 +306,8 @@ function createCategoryDropBox(cat, sub, onChangeCallback) {
 
     box.addEventListener("dragover", (e) => {
         e.preventDefault();
-        const accentColor = normalizeHexColor(cat.color) || '#3b82f6';
+        const accentColor = normalizeHexColor(cat.color) ||
+            getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#3b82f6';
         box.style.outline = `2px solid ${accentColor}`;
         box.style.outlineOffset = '2px';
     });
@@ -423,23 +425,22 @@ function renderCategories() {
             DOM.contextTitle.append(separator);
             DOM.contextTitle.append(' ');
             DOM.contextTitle.append(createCategoryAccentText(state.selectedSubcat, selectedCat.color, 'font-bold text-indigo-600 dark:text-indigo-400'));
+            DOM.contextTitle.classList.remove('hidden');
         } else if (selectedCat) {
             DOM.contextTitle.textContent = '';
             DOM.contextTitle.append('Ausgewählt: ');
             DOM.contextTitle.append(createCategoryAccentText(selectedCat.label, selectedCat.color, 'font-bold text-blue-600 dark:text-blue-400'));
+            DOM.contextTitle.classList.remove('hidden');
         } else {
-            DOM.contextTitle.textContent = 'Bauteile & Kategorien';
+            DOM.contextTitle.textContent = '';
+            DOM.contextTitle.classList.add('hidden');
         }
     } else {
-        DOM.contextTitle.textContent = 'Bauteile & Kategorien';
+        DOM.contextTitle.textContent = '';
+        DOM.contextTitle.classList.add('hidden');
     }
 
     DOM.contextChips.innerHTML = '';
-
-    const hint = document.createElement('p');
-    hint.className = 'text-xs text-slate-500 dark:text-zinc-400 italic w-full mb-3';
-    hint.textContent = 'Jede Box ist auswählbar und ein Drop-Ziel für Bilder (auch Hauptkategorien).';
-    DOM.contextChips.append(hint);
 
     const topActions = document.createElement('div');
     topActions.className = 'flex justify-end mb-3';

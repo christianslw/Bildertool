@@ -1,103 +1,182 @@
-/* Globale UI-Skalierung – entspricht Browser-Zoom 75% */
+/* ============================================================
+   BILDERTOOL — Design Token System
+   Canonical CSS custom properties. Themes override only these.
+   ============================================================ */
+
+/* --- Tokens: Light Mode (default) --- */
 :root {
-    --ui-zoom: 0.75;
+    /* Backgrounds */
+    --color-bg:              #f8fafc;
+    --color-bg-alt:          #f1f5f9;
+    /* Surfaces */
+    --color-surface:         #ffffff;
+    --color-surface-raised:  #ffffff;
+    /* Borders */
+    --color-border:          #e2e8f0;
+    --color-border-subtle:   #f1f5f9;
+    /* Text */
+    --color-text-primary:    #0f172a;
+    --color-text-secondary:  #475569;
+    --color-text-muted:      #94a3b8;
+    /* Accent (primary action) */
+    --color-accent:          #2563eb;
+    --color-accent-hover:    #1d4ed8;
+    --color-accent-subtle:   #eff6ff;
+    /* Status */
+    --color-destructive:     #dc2626;
+    --color-warning:         #d97706;
+    --color-success:         #16a34a;
+    --color-highlight:       rgba(37,99,235,0.08);
+    /* Radius */
+    --radius-sm:   4px;
+    --radius-md:   6px;
+    --radius-lg:   10px;
+    --radius-xl:   16px;
+    --radius-full: 9999px;
+    /* Typography */
+    --font-sans:             'Inter', system-ui, sans-serif;
+    --font-size-sm:          0.75rem;
+    --font-size-base:        0.875rem;
+    --font-size-lg:          1rem;
+    --line-height-tight:     1.25;
+    --line-height-normal:    1.5;
+    /* Shadows */
+    --shadow-sm:  0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md:  0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.05);
+    --shadow-lg:  0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+    --shadow-xl:  0 20px 25px -5px rgba(0,0,0,0.10), 0 10px 10px -5px rgba(0,0,0,0.04);
+    /* Motion */
+    --transition-fast:    100ms ease;
+    --transition-base:    150ms ease;
+    --transition-slow:    250ms cubic-bezier(0.4,0,0.2,1);
+    --transition-spring:  200ms cubic-bezier(0.175,0.885,0.32,1.275);
+    /* Glass */
+    --glass-bg:     rgba(255,255,255,0.82);
+    --glass-border: rgba(255,255,255,0.5);
+    --glass-blur:   blur(12px);
 }
+
+/* --- Tokens: Dark Mode --- */
+.dark {
+    --color-bg:              #09090b;
+    --color-bg-alt:          #18181b;
+    --color-surface:         #18181b;
+    --color-surface-raised:  #27272a;
+    --color-border:          #27272a;
+    --color-border-subtle:   #18181b;
+    --color-text-primary:    #f4f4f5;
+    --color-text-secondary:  #a1a1aa;
+    --color-text-muted:      #52525b;
+    --color-accent:          #3b82f6;
+    --color-accent-hover:    #60a5fa;
+    --color-accent-subtle:   rgba(59,130,246,0.12);
+    --color-destructive:     #ef4444;
+    --color-warning:         #f59e0b;
+    --color-success:         #22c55e;
+    --color-highlight:       rgba(59,130,246,0.15);
+    --shadow-sm:  0 1px 2px rgba(0,0,0,0.30);
+    --shadow-md:  0 4px 6px -1px rgba(0,0,0,0.40), 0 2px 4px -1px rgba(0,0,0,0.20);
+    --shadow-lg:  0 10px 15px -3px rgba(0,0,0,0.50), 0 4px 6px -2px rgba(0,0,0,0.30);
+    --shadow-xl:  0 20px 25px -5px rgba(0,0,0,0.60), 0 10px 10px -5px rgba(0,0,0,0.30);
+    --glass-bg:     rgba(9,9,11,0.88);
+    --glass-border: rgba(255,255,255,0.06);
+}
+
+/* ============================================================
+   Global Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
-    zoom: var(--ui-zoom);
+    font-size: 12px; /* 75% of browser default 16px — scales all rem/Tailwind sizes natively */
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    height: 100%;
 }
 
-body {
-    min-height: calc(100vh / var(--ui-zoom));
-    min-width: calc(100vw / var(--ui-zoom));
+/* ============================================================
+   Focus Ring
+   ============================================================ */
+:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
 }
 
-/* Custom Styles für bearbeitbare Felder und Dropdowns */
+/* ============================================================
+   Scrollbars
+   ============================================================ */
+::-webkit-scrollbar          { width: 6px; height: 6px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+    transition: background var(--transition-fast);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+/* ============================================================
+   Glass Utility
+   ============================================================ */
+.glass {
+    background: var(--glass-bg) !important;
+    border-color: var(--glass-border) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* ============================================================
+   Editable Inline Segments
+   ============================================================ */
 .editable-segment {
     display: inline-block;
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: transparent;
     border: 1px solid transparent;
     cursor: text;
-    transition: all 0.2s;
+    transition: all var(--transition-base);
     outline: none;
     min-width: 20px;
 }
-
 .editable-segment:hover {
-    background: rgba(148, 163, 184, 0.2);
+    background: var(--color-highlight);
 }
-
 .editable-segment:focus {
-    background: rgba(59, 130, 246, 0.1);
-    color: #2563eb;
-    border-color: #93c5fd;
-}
-
-.dark .editable-segment:focus {
-    color: #60a5fa;
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.2);
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
 }
 
 .placeholder {
-    color: #94a3b8;
+    color: var(--color-text-muted);
     font-style: italic;
 }
 
-.dark .placeholder {
-    color: #52525b;
-}
-
-/* Such-Dropdown */
+/* ============================================================
+   Floating Autocomplete / Custom Dropdown
+   ============================================================ */
 .custom-dropdown {
     position: absolute;
     z-index: 50;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.375rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    max-height: 250px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-height: 260px;
     overflow-y: auto;
 }
 
-.dark .custom-dropdown {
-    background: #18181b;
-    border-color: #27272a;
+/* Entrance animation */
+.custom-dropdown:not(.hidden) {
+    animation: token-slideUp var(--transition-base) ease both;
 }
 
-/* Globale Scrollbar Styles (Fix für Dark Mode weiße Ränder) */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-
-html.dark ::-webkit-scrollbar-track {
-    background: #09090b;
-}
-
-html.dark ::-webkit-scrollbar-thumb {
-    background: #3f3f46;
-}
-
-.dark .view-container::-webkit-scrollbar-track,
-.dark .categories-grid::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-/* ---- Drop target visual feedback ---- */
-
-/* Floating badge showing drop destination */
+/* ============================================================
+   Drop Target & Badge
+   ============================================================ */
 .drop-badge {
     position: absolute;
     top: 0.35rem;
@@ -107,23 +186,161 @@ html.dark ::-webkit-scrollbar-thumb {
     align-items: center;
     gap: 0.3rem;
     padding: 0.2rem 0.6rem 0.2rem 0.45rem;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     font-size: 0.68rem;
     font-weight: 700;
     color: #fff;
     pointer-events: none;
     white-space: nowrap;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-    backdrop-filter: blur(4px);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     letter-spacing: 0.01em;
-    transition: opacity 0.12s;
+    transition: opacity var(--transition-fast);
 }
 .drop-badge.hidden { display: none; }
 
-/* Container-level drop target (no sections in list) */
 #fileListContainer.container-drop-target {
-    outline: 2px dashed #94a3b8;
+    outline: 2px dashed var(--color-text-muted);
     outline-offset: -4px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     position: relative;
+}
+
+/* ============================================================
+   List Item Selected State (base; themes may intensify)
+   ============================================================ */
+.list-item-selected {
+    background-color: var(--color-highlight) !important;
+    border-left: 2px solid var(--color-accent) !important;
+    box-shadow: inset 2px 0 0 var(--color-accent) !important;
+    padding-left: calc(0.75rem - 2px) !important;
+    color: var(--color-text-primary) !important;
+}
+
+/* ============================================================
+   Annotation Editor Toolbar Buttons
+   ============================================================ */
+.editor-tool-btn {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.12);
+    color: #a1a1aa;
+    transition: all var(--transition-base);
+}
+.editor-tool-btn:hover {
+    background: rgba(255,255,255,0.10);
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.25);
+}
+.editor-tool-btn[data-active="true"] {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.30);
+}
+
+/* Annotation color swatches */
+.editor-color-btn {
+    transition: transform var(--transition-spring), box-shadow var(--transition-base);
+}
+.editor-color-btn:hover { transform: scale(1.18); }
+.editor-color-btn.ring-2 {
+    transform: scale(1.22);
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-accent);
+}
+
+/* ============================================================
+   Categories Panel — 80% scale inner wrapper
+   Panel itself fills flex space; content transforms to 80%.
+   125% size compensates so the content fills the panel.
+   ============================================================ */
+#categoriesPanel {
+    position: relative;
+}
+.categories-scale-inner {
+    transform: scale(0.8);
+    transform-origin: top left;
+    width: 125%;
+    height: 125%;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+/* ============================================================
+   Empty Drop Zone (shown when file list is empty)
+   ============================================================ */
+.empty-drop-zone {
+    position: absolute;
+    inset: 0.5rem;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-xl);
+    background: transparent;
+    color: var(--color-text-muted);
+    user-select: none;
+    transition: border-color var(--transition-slow), background var(--transition-slow), color var(--transition-slow);
+}
+.empty-drop-zone:hover,
+.empty-drop-zone.drag-over {
+    border-color: var(--color-accent);
+    background: var(--color-highlight);
+    color: var(--color-accent);
+}
+.empty-drop-zone__icon {
+    font-size: 4rem;
+    opacity: 0.25;
+    line-height: 1;
+    transition: opacity var(--transition-slow), transform var(--transition-slow);
+}
+.empty-drop-zone:hover .empty-drop-zone__icon,
+.empty-drop-zone.drag-over .empty-drop-zone__icon {
+    opacity: 0.65;
+    transform: translateY(-4px) scale(1.08);
+}
+.empty-drop-zone__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: inherit;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+.empty-drop-zone__sub {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    margin: 0;
+}
+
+/* container must be positioned so absolute child anchors correctly */
+.view-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================================
+   Micro-Animations
+   ============================================================ */
+@keyframes token-slideUp {
+    from { opacity: 0; transform: translateY(5px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+@keyframes token-fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Press feedback */
+button:not(:disabled):active,
+[role="button"]:not([disabled]):active {
+    transform: scale(0.96) !important;
+    transition: transform 80ms ease !important;
 }

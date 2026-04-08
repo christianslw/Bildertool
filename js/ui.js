@@ -181,14 +181,14 @@ function updateStatusText() {
 
 function updateSaveButtonUI() {
     if (state.directoryHandle) {
-        DOM.mainSaveBtn.textContent = "Alle speichern";
-        DOM.mainSaveBtn.classList.remove('rounded-md');
-        DOM.mainSaveBtn.classList.add('rounded-l-md');
+        DOM.mainSaveBtn.innerHTML = '<i class="mdi mdi-content-save text-sm"></i> Speichern';
+        DOM.mainSaveBtn.classList.remove('rounded-lg');
+        DOM.mainSaveBtn.classList.add('rounded-l-lg');
         DOM.saveDropdownTrigger.classList.remove('hidden');
     } else {
-        DOM.mainSaveBtn.textContent = "Alle speichern unter";
-        DOM.mainSaveBtn.classList.remove('rounded-l-md');
-        DOM.mainSaveBtn.classList.add('rounded-md');
+        DOM.mainSaveBtn.innerHTML = '<i class="mdi mdi-content-save text-sm"></i> Speichern unter…';
+        DOM.mainSaveBtn.classList.remove('rounded-l-lg');
+        DOM.mainSaveBtn.classList.add('rounded-lg');
         DOM.saveDropdownTrigger.classList.add('hidden');
     }
     updateStatusText();

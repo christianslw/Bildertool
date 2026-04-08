@@ -219,7 +219,7 @@ function renderSelectionBar() {
     if (count === 0) {
         bar.className = 'sticky top-0 z-10 flex items-center gap-2 px-3 py-2 mb-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md text-xs text-slate-400 dark:text-zinc-500';
         bar.innerHTML = `
-          <span class="flex-1">Strg+Klick um auszuwählen &middot; Shift+Klick für Bereich &middot; Strg+A für alle</span>
+          <span class="flex-1"></span>
           <button id="selBarSelectAll" class="px-2 py-0.5 rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors">Alle auswählen</button>
         `;
         bar.querySelector('#selBarSelectAll').addEventListener('click', () => {
@@ -423,6 +423,10 @@ function renderList() {
         renderListStation();
     }
 
+    // Show / hide the persistent empty drop zone
+    const emptyZone = document.getElementById('emptyDropZone');
+    if (emptyZone) emptyZone.classList.toggle('hidden', getSortedFiles().length > 0);
+
     updateStatusText();
     DOM.viewDropdownTrigger.innerHTML = viewIcons[state.viewMode] || viewIcons.list;
 }
@@ -547,14 +551,16 @@ function _setDropTarget(section, hint) {
         const key = section.dataset.groupOber;
         const color = getCategoryColor(key);
         const palette = getCategoryAccentPalette(color);
-        const accentColor = (palette && palette.borderStrong) || '#3b82f6';
+        const accentColor = (palette && palette.borderStrong) ||
+            getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#3b82f6';
         section.style.outline = `2px solid ${accentColor}`;
         section.style.outlineOffset = '3px';
         section.style.borderRadius = '8px';
         _dropBadge.style.background = accentColor;
     } else {
         DOM.fileListContainer.classList.add('container-drop-target');
-        _dropBadge.style.background = '#64748b';
+        _dropBadge.style.background =
+            getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim() || '#64748b';
     }
     _dropBadge.innerHTML = hint;
     _dropBadge.classList.remove('hidden');

@@ -1,8 +1,8 @@
 /** =========================================================================
  * MODUL: DATEI-INGESTION & VERARBEITUNG
  * ========================================================================= */
-function handleDroppedFiles(fileList, targetConfig) {
-    processFiles(fileList, targetConfig);
+async function handleDroppedFiles(fileList, targetConfig) {
+    await processFiles(fileList, targetConfig);
 }
 
 function isJpegFile(file) {
