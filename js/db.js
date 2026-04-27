@@ -77,17 +77,25 @@ function persistConfigToLocalStorage() {
     localStorage.setItem('customCategoryColors', JSON.stringify(state.customCategoryColors));
     localStorage.setItem('autoGpsEnabled', state.autoGpsEnabled);
     localStorage.setItem('excludeUnmatched', state.excludeUnmatched);
+    localStorage.setItem('aiPassiveLearnOnSave', state.aiPassiveLearnOnSave);
+    localStorage.setItem('aiPassiveLearnMinConfidence', String(state.aiPassiveLearnMinConfidence));
+    localStorage.setItem('aiAutoCommentEnabled', state.aiAutoCommentEnabled);
+    localStorage.setItem('aiAutoCommentMinConfidence', String(state.aiAutoCommentMinConfidence));
 }
 
 function getConfigPayload() {
     return {
-        version: 2,
+        version: 3,
         savedAt: new Date().toISOString(),
         suggestions: state.suggestions,
         categories: categoriesConfig,
         customCategoryColors: state.customCategoryColors,
         autoGpsEnabled: state.autoGpsEnabled,
-        excludeUnmatched: state.excludeUnmatched
+        excludeUnmatched: state.excludeUnmatched,
+        aiPassiveLearnOnSave: state.aiPassiveLearnOnSave,
+        aiPassiveLearnMinConfidence: state.aiPassiveLearnMinConfidence,
+        aiAutoCommentEnabled: state.aiAutoCommentEnabled,
+        aiAutoCommentMinConfidence: state.aiAutoCommentMinConfidence
     };
 }
 
@@ -102,6 +110,14 @@ function applyConfigPayload(payload) {
     ]);
     if (typeof payload?.autoGpsEnabled === 'boolean') state.autoGpsEnabled = payload.autoGpsEnabled;
     if (typeof payload?.excludeUnmatched === 'boolean') state.excludeUnmatched = payload.excludeUnmatched;
+    if (typeof payload?.aiPassiveLearnOnSave === 'boolean') state.aiPassiveLearnOnSave = payload.aiPassiveLearnOnSave;
+    if (Number.isFinite(payload?.aiPassiveLearnMinConfidence)) {
+        state.aiPassiveLearnMinConfidence = Math.max(0, Math.min(1, Number(payload.aiPassiveLearnMinConfidence)));
+    }
+    if (typeof payload?.aiAutoCommentEnabled === 'boolean') state.aiAutoCommentEnabled = payload.aiAutoCommentEnabled;
+    if (Number.isFinite(payload?.aiAutoCommentMinConfidence)) {
+        state.aiAutoCommentMinConfidence = Math.max(0, Math.min(1, Number(payload.aiAutoCommentMinConfidence)));
+    }
     persistConfigToLocalStorage();
 
     if (!categoriesConfig.find(cat => cat.id === state.selectedCategory)) {

@@ -8,13 +8,23 @@ function showAutocomplete(element, type) {
 
     if (type === 'kommentar') {
         const query = (val === 'kommentar') ? '' : val;
-        filtered = state.suggestions.filter(s => s.toLowerCase().includes(query));
+        const whitelist = typeof getWhitelistedComments === 'function' ? getWhitelistedComments() : [];
+        const userSuggestions = state.suggestions || [];
+        const merged = [...whitelist, ...userSuggestions.filter(s => !whitelist.some(w => w.toLowerCase() === String(s).toLowerCase()))];
+        filtered = merged.filter(s => s.toLowerCase().includes(query));
 
         filtered.forEach(s => {
+            const isWhitelisted = typeof isWhitelistedComment === 'function' && isWhitelistedComment(s);
             const div = document.createElement('div');
-            div.className = "px-3 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-slate-700 dark:text-zinc-200 border-b border-slate-100 dark:border-zinc-800 last:border-0";
+            div.className = isWhitelisted
+                ? "px-3 py-2 cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-b border-slate-100 dark:border-zinc-800 last:border-0 flex items-center justify-between gap-2"
+                : "px-3 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-slate-700 dark:text-zinc-200 border-b border-slate-100 dark:border-zinc-800 last:border-0";
             div.dataset.autocompleteItem = '1';
-            div.textContent = s;
+            if (isWhitelisted) {
+                div.innerHTML = `<span class="truncate">${s}</span><span class="shrink-0 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 text-[10px] font-semibold">Whitelist</span>`;
+            } else {
+                div.textContent = s;
+            }
             div.onmousedown = (ev) => {
                 ev.preventDefault();
                 element.textContent = s;
@@ -77,8 +87,13 @@ function showAutocomplete(element, type) {
 
 function openSettings() {
     document.getElementById('settingsModal').classList.remove('hidden');
+    if (typeof refreshAiCommentWhitelist === 'function') refreshAiCommentWhitelist();
     if (DOM.autoGpsToggle) DOM.autoGpsToggle.checked = state.autoGpsEnabled;
     if (DOM.excludeUnmatchedToggle) DOM.excludeUnmatchedToggle.checked = state.excludeUnmatched;
+    if (DOM.aiPassiveLearnOnSaveToggle) DOM.aiPassiveLearnOnSaveToggle.checked = state.aiPassiveLearnOnSave;
+    if (DOM.aiPassiveLearnMinConfidenceInput) DOM.aiPassiveLearnMinConfidenceInput.value = String(state.aiPassiveLearnMinConfidence);
+    if (DOM.aiAutoCommentEnabledToggle) DOM.aiAutoCommentEnabledToggle.checked = state.aiAutoCommentEnabled;
+    if (DOM.aiAutoCommentMinConfidenceInput) DOM.aiAutoCommentMinConfidenceInput.value = String(state.aiAutoCommentMinConfidence);
     renderSettingsList();
 }
 function closeSettings() {
@@ -95,7 +110,20 @@ window.toggleThemeContextMenu = toggleThemeContextMenu;
 function renderSettingsList() {
     const list = document.getElementById('suggestionsList');
     list.innerHTML = '';
+
+    const whitelist = typeof getWhitelistedComments === 'function' ? getWhitelistedComments() : [];
+    whitelist.forEach((entry) => {
+        const row = document.createElement('div');
+        row.className = "flex justify-between items-center p-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded text-sm";
+        row.innerHTML = `
+            <span class="min-w-0 truncate text-emerald-800 dark:text-emerald-300 font-medium">${entry}</span>
+            <span class="ml-2 shrink-0 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">Whitelist</span>
+        `;
+        list.appendChild(row);
+    });
+
     state.suggestions.forEach((s, idx) => {
+        if (typeof isWhitelistedComment === 'function' && isWhitelistedComment(s)) return;
         const row = document.createElement('div');
         row.className = "flex justify-between items-center p-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded text-sm";
         const input = document.createElement('input');
@@ -132,6 +160,7 @@ function renderSettingsList() {
 function hasSuggestion(value, exceptIdx = -1) {
     const normalized = String(value || '').trim().toLowerCase();
     if (!normalized) return false;
+    if (typeof isWhitelistedComment === 'function' && isWhitelistedComment(normalized)) return true;
     return state.suggestions.some((entry, idx) => idx !== exceptIdx && String(entry || '').trim().toLowerCase() === normalized);
 }
 
@@ -177,3 +206,39 @@ function removeSuggestion(idx) {
 
 if (DOM.chooseConfigFileBtn) DOM.chooseConfigFileBtn.addEventListener('click', chooseConfigFile);
 if (DOM.reloadConfigFileBtn) DOM.reloadConfigFileBtn.addEventListener('click', reloadConfigFile);
+
+if (DOM.aiPassiveLearnOnSaveToggle) {
+    DOM.aiPassiveLearnOnSaveToggle.addEventListener('change', (e) => {
+        state.aiPassiveLearnOnSave = e.target.checked;
+        persistConfigToLocalStorage();
+        syncConfigFile({ silent: true });
+    });
+}
+
+if (DOM.aiPassiveLearnMinConfidenceInput) {
+    DOM.aiPassiveLearnMinConfidenceInput.addEventListener('change', (e) => {
+        const value = Math.max(0, Math.min(1, parseFloat(e.target.value) || 0));
+        state.aiPassiveLearnMinConfidence = value;
+        e.target.value = String(value);
+        persistConfigToLocalStorage();
+        syncConfigFile({ silent: true });
+    });
+}
+
+if (DOM.aiAutoCommentEnabledToggle) {
+    DOM.aiAutoCommentEnabledToggle.addEventListener('change', (e) => {
+        state.aiAutoCommentEnabled = e.target.checked;
+        persistConfigToLocalStorage();
+        syncConfigFile({ silent: true });
+    });
+}
+
+if (DOM.aiAutoCommentMinConfidenceInput) {
+    DOM.aiAutoCommentMinConfidenceInput.addEventListener('change', (e) => {
+        const value = Math.max(0, Math.min(1, parseFloat(e.target.value) || 0));
+        state.aiAutoCommentMinConfidence = value;
+        e.target.value = String(value);
+        persistConfigToLocalStorage();
+        syncConfigFile({ silent: true });
+    });
+}

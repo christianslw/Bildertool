@@ -33,7 +33,16 @@ const state = {
     redoStack: [],
     lastClickedId: null,
     autoGpsEnabled: localStorage.getItem('autoGpsEnabled') !== 'false',
-    excludeUnmatched: localStorage.getItem('excludeUnmatched') === 'true'
+    excludeUnmatched: localStorage.getItem('excludeUnmatched') === 'true',
+    aiCategorizerEnabled: localStorage.getItem('aiCategorizerEnabled') !== 'false',
+    aiCategorizerBaseUrl: localStorage.getItem('aiCategorizerBaseUrl') || 'http://127.0.0.1:8765',
+    aiCategorizerTopK: Math.max(1, parseInt(localStorage.getItem('aiCategorizerTopK') || '5', 10) || 5),
+    aiWhitelistedComments: normalizeSuggestions(JSON.parse(localStorage.getItem('aiWhitelistedComments') || '[]')),
+    aiAutoLearnOnIngest: localStorage.getItem('aiAutoLearnOnIngest') !== 'false',
+    aiPassiveLearnOnSave: localStorage.getItem('aiPassiveLearnOnSave') !== 'false',
+    aiPassiveLearnMinConfidence: Math.max(0, Math.min(1, parseFloat(localStorage.getItem('aiPassiveLearnMinConfidence') || '0.72') || 0.72)),
+    aiAutoCommentEnabled: localStorage.getItem('aiAutoCommentEnabled') === 'true',
+    aiAutoCommentMinConfidence: Math.max(0, Math.min(1, parseFloat(localStorage.getItem('aiAutoCommentMinConfidence') || '0.68') || 0.68))
 };
 
 const viewIcons = {
@@ -60,6 +69,7 @@ const DOM = {
     undoBtn: document.getElementById("undoBtn"),
     redoBtn: document.getElementById("redoBtn"),
     statusEl: document.getElementById("status"),
+    aiServiceStatus: document.getElementById("aiServiceStatus"),
     autocompleteDropdown: document.getElementById("autocompleteDropdown"),
 
     // Toolbar UI Elemente
@@ -82,7 +92,11 @@ const DOM = {
     filterDropdownMenu: document.getElementById("filterDropdownMenu"),
     filterTextInput: document.getElementById("filterTextInput"),
     autoGpsToggle: document.getElementById("autoGpsToggle"),
-    excludeUnmatchedToggle: document.getElementById("excludeUnmatchedToggle")
+    excludeUnmatchedToggle: document.getElementById("excludeUnmatchedToggle"),
+    aiPassiveLearnOnSaveToggle: document.getElementById("aiPassiveLearnOnSaveToggle"),
+    aiPassiveLearnMinConfidenceInput: document.getElementById("aiPassiveLearnMinConfidenceInput"),
+    aiAutoCommentEnabledToggle: document.getElementById("aiAutoCommentEnabledToggle"),
+    aiAutoCommentMinConfidenceInput: document.getElementById("aiAutoCommentMinConfidenceInput")
 };
 
 // Checkbox Zustand aus LocalStorage initialisieren

@@ -77,6 +77,10 @@ async function executeSave(forceSaveAs = false) {
         : state.files.filter(f => f.tabId === state.activeTabId);
     if (!filesToUse.length) return;
 
+    if (typeof queueAiPassiveLearnForItem === 'function') {
+        filesToUse.forEach((item) => queueAiPassiveLearnForItem(item));
+    }
+
     if (!window.showDirectoryPicker) {
         alert("Dein Browser unterstützt die Ordnerauswahl leider nicht. Dateien werden direkt heruntergeladen.");
         await processSaveLoop(null, filesToUse);
@@ -211,6 +215,7 @@ async function processSaveLoop(baseHandle, fileList = null) {
 
         savedCount++;
         DOM.statusEl.textContent = `Speicherung läuft… (${savedCount} / ${totalCount})`;
+
     }
     DOM.statusEl.textContent = `✅ ${totalCount} Bild${totalCount !== 1 ? 'er' : ''} erfolgreich gespeichert!`;
     setTimeout(updateStatusText, 4000);
@@ -317,4 +322,11 @@ window.addEventListener('beforeunload', (event) => {
     if (!state.files.length) return;
     event.preventDefault();
     event.returnValue = '';
+});
+
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 's') {
+        e.preventDefault();
+        executeSave(true);
+    }
 });

@@ -5,8 +5,28 @@ function showToast(message, { undoAction, duration = 4000 } = {}) {
     const container = document.getElementById('toastContainer');
     if (!container) { console.warn(message); return; }
     const toast = document.createElement('div');
-    toast.className = 'pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg bg-slate-800 dark:bg-zinc-100 text-slate-100 dark:text-zinc-900 text-sm font-medium max-w-sm transition-all duration-300 opacity-0 translate-y-2';
-    toast.innerHTML = `<span class="flex-1">${message}</span>`;
+    const options = arguments[1] || {};
+    const variant = String(options.variant || '').trim().toLowerCase();
+    const multiplier = Number(options.multiplier || 0);
+
+    toast.className = 'toast pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg bg-slate-800 dark:bg-zinc-100 text-slate-100 dark:text-zinc-900 text-sm font-medium max-w-sm transition-all duration-300 opacity-0 translate-y-2';
+    if (variant === 'ai-learn') {
+        toast.classList.add('toast-ai-learn');
+    }
+
+    const msg = document.createElement('span');
+    msg.className = 'flex-1';
+    msg.textContent = message;
+    toast.appendChild(msg);
+
+    if (variant === 'ai-learn' && multiplier > 1) {
+        const mult = document.createElement('span');
+        mult.className = 'toast-multiplier';
+        mult.textContent = `x${multiplier}`;
+        mult.title = `${multiplier} Lernaktionen gebuendelt`;
+        toast.appendChild(mult);
+    }
+
     if (undoAction) {
         const undoBtn = document.createElement('button');
         undoBtn.textContent = 'Rückgängig';

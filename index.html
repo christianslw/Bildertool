@@ -144,6 +144,12 @@
                 <div class="flex items-center gap-2 shrink-0">
                     <span id="status"
                         class="text-xs text-slate-500 dark:text-zinc-400 font-medium truncate max-w-[80px]">0 Dateien</span>
+                    <span id="aiServiceStatus"
+                        class="inline-flex items-center gap-1 rounded-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-0.5 text-[11px] font-semibold text-slate-500 dark:text-zinc-400"
+                        title="AI Backend Status">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-zinc-500"></span>
+                        AI: ...
+                    </span>
                     <!-- Filter / Sort / Group Dropdown -->
 <div class="relative">
                         <button id="filterDropdownTrigger"
@@ -317,6 +323,32 @@
                         <input type="checkbox" id="excludeUnmatchedToggle" class="w-4 h-4 accent-blue-600">
                         Bilder ohne Standort ausschließen
                     </label>
+                </div>
+
+                <div class="rounded-lg border border-amber-200 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/30 p-3">
+                    <h4 class="text-sm font-semibold text-slate-900 dark:text-zinc-100 mb-2">AI Experimental</h4>
+                    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300 cursor-pointer mb-2 select-none">
+                        <input type="checkbox" id="aiPassiveLearnOnSaveToggle" class="w-4 h-4 accent-blue-600" checked>
+                        Unveränderte AI-Zuordnungen beim Speichern schwach lernen
+                    </label>
+                    <label class="flex items-center justify-between gap-2 text-xs text-slate-600 dark:text-zinc-400 mb-3">
+                        Mindestvertrauen (0-1)
+                        <input id="aiPassiveLearnMinConfidenceInput" type="number" min="0" max="1" step="0.01" value="0.72"
+                            class="w-20 p-1 rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200" />
+                    </label>
+
+                    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300 cursor-pointer mb-2 select-none">
+                        <input type="checkbox" id="aiAutoCommentEnabledToggle" class="w-4 h-4 accent-blue-600">
+                        Kommentar automatisch setzen (experimentell)
+                    </label>
+                    <label class="flex items-center justify-between gap-2 text-xs text-slate-600 dark:text-zinc-400">
+                        Kommentar-Mindestvertrauen (0-1)
+                        <input id="aiAutoCommentMinConfidenceInput" type="number" min="0" max="1" step="0.01" value="0.68"
+                            class="w-20 p-1 rounded border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200" />
+                    </label>
+                    <p class="text-[11px] text-slate-500 dark:text-zinc-500 mt-2">
+                        Kommentare werden nur übernommen, wenn sie in backend/image_categorizer/data/comment-whitelist.txt stehen.
+                    </p>
                 </div>
 
                 <div class="rounded-md border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
@@ -508,6 +540,7 @@
     <script src="js/tabs.js"></script>
     <script src="js/db.js"></script>
     <script src="js/config.js"></script>
+    <script src="js/ai-categorizer.js"></script>
     <script src="js/categories.js"></script>
     <script src="js/file-ingestion.js"></script>
     <script src="js/undo.js"></script>

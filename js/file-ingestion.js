@@ -48,13 +48,14 @@ async function normalizeIncomingFiles(fileList) {
 
     for (const file of accepted) {
         if (!isHeicFile(file)) {
-            normalized.push({ file, originalSourceName: file.name });
+            normalized.push({ file, originalSourceName: file.name, exifSourceFile: file });
             continue;
         }
 
         try {
             const jpegFile = await convertHeicToJpeg(file);
-            normalized.push({ file: jpegFile, originalSourceName: file.name });
+            // Keep original HEIC as EXIF source because conversion usually strips metadata.
+            normalized.push({ file: jpegFile, originalSourceName: file.name, exifSourceFile: file });
         } catch (error) {
             failedHeicNames.push(file.name);
             console.error('HEIC konnte nicht konvertiert werden:', file.name, error);
@@ -68,7 +69,59 @@ async function normalizeIncomingFiles(fileList) {
     return normalized;
 }
 
+function _toNumber(value) {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+        const normalized = value.replace(',', '.').trim();
+        const parsed = Number(normalized);
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+}
+
+function _dmsArrayToDecimal(arr, ref) {
+    if (!Array.isArray(arr) || arr.length < 3) return null;
+    const deg = _toNumber(arr[0]);
+    const min = _toNumber(arr[1]);
+    const sec = _toNumber(arr[2]);
+    if (deg == null || min == null || sec == null) return null;
+    let dec = deg + min / 60 + sec / 3600;
+    const signRef = String(ref || '').toUpperCase();
+    if (signRef === 'S' || signRef === 'W') dec *= -1;
+    return dec;
+}
+
+function _extractExifCoords(exif) {
+    if (!exif || typeof exif !== 'object') return null;
+
+    const latDirect = _toNumber(exif.latitude);
+    const lonDirect = _toNumber(exif.longitude);
+    if (latDirect != null && lonDirect != null) {
+        return { latitude: latDirect, longitude: lonDirect };
+    }
+
+    const latAlt = _toNumber(exif.GPSLatitude);
+    const lonAlt = _toNumber(exif.GPSLongitude);
+    if (latAlt != null && lonAlt != null) {
+        return { latitude: latAlt, longitude: lonAlt };
+    }
+
+    const latDms = _dmsArrayToDecimal(exif.GPSLatitude, exif.GPSLatitudeRef);
+    const lonDms = _dmsArrayToDecimal(exif.GPSLongitude, exif.GPSLongitudeRef);
+    if (latDms != null && lonDms != null) {
+        return { latitude: latDms, longitude: lonDms };
+    }
+
+    return null;
+}
+
 async function processFiles(files, targetConfig) {
+    const resolvedTarget = {
+        oberkategorie: targetConfig?.oberkategorie || '',
+        unterkategorie: targetConfig?.unterkategorie || '',
+        lockCategory: !!targetConfig?.lockCategory,
+    };
+
     const inputValue = DOM.standortSelect.value;
     const match = inputValue.match(/\((\d+)\)$/);
     const standortNummer = match ? match[1] : inputValue;
@@ -89,6 +142,7 @@ async function processFiles(files, targetConfig) {
 
         const batchResults = await Promise.all(batch.map(async (fileEntry) => {
             const file = fileEntry.file;
+            const exifSourceFile = fileEntry.exifSourceFile || file;
 
             // Hash + EXIF in parallel for each file
             let hash = null;
@@ -99,7 +153,7 @@ async function processFiles(files, targetConfig) {
                 const [hashBuffer, exif] = await Promise.all([
                     file.arrayBuffer().then(buf => crypto.subtle.digest('SHA-256', buf)),
                     typeof exifr !== 'undefined'
-                        ? exifr.parse(file, { gps: true, exif: true, ifd0: false }).catch(() => null)
+                        ? exifr.parse(exifSourceFile, { gps: true, exif: true, ifd0: false }).catch(() => null)
                         : Promise.resolve(null)
                 ]);
 
@@ -109,8 +163,9 @@ async function processFiles(files, targetConfig) {
                     const d = exif.DateTimeOriginal;
                     exifDatum = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
                 }
-                if (!itemStandort && state.autoGpsEnabled && typeof exif?.latitude === 'number' && typeof exif?.longitude === 'number') {
-                    const closest = findClosestStandort(exif.latitude, exif.longitude, 1.0);
+                const coords = _extractExifCoords(exif);
+                if (!itemStandort && state.autoGpsEnabled && coords) {
+                    const closest = findClosestStandort(coords.latitude, coords.longitude, 1.0);
                     if (closest) {
                         itemStandort = String(closest.nummer).padStart(4, '0');
                     }
@@ -154,18 +209,38 @@ async function processFiles(files, targetConfig) {
                 tabId,
                 standort: itemStandort,
                 datum: exifDatum || formatDate(file.lastModified || Date.now()),
-                oberkategorie: targetConfig.oberkategorie,
-                unterkategorie: targetConfig.unterkategorie,
+                oberkategorie: resolvedTarget.oberkategorie,
+                unterkategorie: resolvedTarget.unterkategorie,
                 kommentar: "",
                 originalFile: file,
                 originalSourceName: fileEntry.originalSourceName || file.name,
                 objectUrl: URL.createObjectURL(file),
-                hash: hash
+                hash: hash,
+                aiCategorySeeded: !!(resolvedTarget.oberkategorie || resolvedTarget.unterkategorie),
+                aiCategoryLocked: resolvedTarget.lockCategory,
+                aiSuggestion: null,
+                aiLearnStatus: null,
+                aiPassiveLearnStatus: null,
+                aiManuallyOverridden: false,
+                aiCommentStatus: null,
+                aiCommentManuallyOverridden: false
             };
 
             if (hash) state.hashes.add(hash);
             state.files.push(item);
             addedItems.push(item);
+
+            if (typeof queueAiSuggestionForItem === 'function') {
+                // Mark that ingest-learn is pending; ai-categorizer will fire it
+                // AFTER the suggestion resolves so the stored label is correct.
+                if (state.aiAutoLearnOnIngest) {
+                    item._pendingIngestLearn = true;
+                }
+                queueAiSuggestionForItem(item);
+            } else if (state.aiAutoLearnOnIngest && typeof queueAiLearnForItem === 'function') {
+                // AI suggestions not available at all — learn immediately with zone label.
+                queueAiLearnForItem(item, 'ingest-labeled');
+            }
         }
     }
 

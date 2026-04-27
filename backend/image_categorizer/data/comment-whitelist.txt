@@ -1,0 +1,13 @@
+# One allowed comment per line. Lines starting with # are ignored.
+# AI stores/suggests comments only from this list.
+Prüfsiegel
+Schließzylinder
+Zählerstand
+Rack
+Rettungsplan
+EMVU-Plan
+Gesamtansicht
+Detailansicht
+Innenansicht
+Außenansicht
+Typenschild

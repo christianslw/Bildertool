@@ -319,6 +319,7 @@ function createCategoryDropBox(cat, sub, onChangeCallback) {
     box.addEventListener("drop", (e) => {
         e.preventDefault();
         e.stopPropagation();
+        state.dragReorderSrcId = null;
         box.style.outline = '';
         box.style.outlineOffset = '';
         box.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20');
@@ -335,6 +336,10 @@ function createCategoryDropBox(cat, sub, onChangeCallback) {
                 const prevUnter = file.unterkategorie;
                 file.oberkategorie = cat.id;
                 file.unterkategorie = targetSubcat;
+                file.aiManuallyOverridden = true;
+                if (typeof queueAiLearnForItem === 'function') {
+                    queueAiLearnForItem(file, 'manual-recategory');
+                }
                 renderList();
                 renderCategories();
                 showToast(`Kategorie geändert.`, {
@@ -354,7 +359,11 @@ function createCategoryDropBox(cat, sub, onChangeCallback) {
         // Native file drop
         renderCategories();
         if (e.dataTransfer.files.length > 0) {
-            handleDroppedFiles(e.dataTransfer.files, { oberkategorie: cat.id, unterkategorie: targetSubcat });
+            handleDroppedFiles(e.dataTransfer.files, {
+                oberkategorie: cat.id,
+                unterkategorie: targetSubcat,
+                lockCategory: true,
+            });
         }
     });
 

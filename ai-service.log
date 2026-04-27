@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\b49891\.vscode\projects\Bildertool\backend\image_categorizer\main.py", line 3, in <module>
+    import uvicorn
+ModuleNotFoundError: No module named 'uvicorn'

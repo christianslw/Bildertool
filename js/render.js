@@ -25,13 +25,23 @@ function getEditorHTML(item) {
     const uKat = item.unterkategorie || 'Unterkategorie';
     const uKatClass = item.unterkategorie ? '' : 'placeholder';
     const kom = item.kommentar || 'Kommentar';
-    const komClass = item.kommentar ? '' : 'placeholder';
+    const isWhitelistedKom = item.kommentar && (typeof isWhitelistedComment === 'function') && isWhitelistedComment(item.kommentar);
+    const komClass = item.kommentar
+        ? (isWhitelistedKom ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700' : '')
+        : 'placeholder';
     const st = item.standort || 'Standort';
     const dt = item.datum || 'Datum';
 
-    const showSaveBtn = item.kommentar && !state.suggestions.includes(item.kommentar);
+    const showSaveBtn = item.kommentar
+        && !state.suggestions.includes(item.kommentar)
+        && !(typeof isWhitelistedComment === 'function' && isWhitelistedComment(item.kommentar));
     const saveBtnHtml = showSaveBtn
         ? `<button class="save-suggestion-btn shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-100 hover:bg-emerald-200 text-emerald-600 hover:text-emerald-800 dark:bg-emerald-900/30 dark:hover:bg-emerald-800/50 dark:text-emerald-400 transition-colors text-[11px] font-bold leading-none" title="&quot;${item.kommentar}&quot; als Vorschlag speichern" data-kommentar="${item.kommentar}">+</button>`
+        : '';
+
+    const aiSuggestion = item.aiSuggestion;
+    const aiHintHtml = aiSuggestion && aiSuggestion.status === 'ready' && aiSuggestion.label
+        ? `<span class="ml-2 inline-flex items-center gap-1 rounded-md border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-300" title="AI Vorschlag">AI: ${aiSuggestion.label}${Number.isFinite(aiSuggestion.confidence) ? ` (${Math.round(aiSuggestion.confidence * 100)}%)` : ''}</span>`
         : '';
 
     return `
@@ -42,6 +52,7 @@ function getEditorHTML(item) {
               <span class="editable-segment text-blue-600 dark:text-blue-400 font-semibold" contenteditable="false" data-field="oberkategorie">${item.oberkategorie}</span>_
               <span class="editable-segment ${uKatClass}" contenteditable="true" data-field="unterkategorie">${uKat}</span>_
               <span class="editable-segment ${komClass}" contenteditable="true" data-field="kommentar">${kom}</span>.jpg
+                            ${aiHintHtml}
             </div>
             ${saveBtnHtml}
           </div>
@@ -257,7 +268,13 @@ function renderSelectionBar() {
             state.files.forEach(f => {
                 if (!state.selectedFileIds.has(f.id)) return;
                 oldValues[f.id] = { unterkategorie: f.unterkategorie, kommentar: f.kommentar, datum: f.datum };
-                if (subcat) f.unterkategorie = subcat;
+                if (subcat && f.unterkategorie !== subcat) {
+                    f.unterkategorie = subcat;
+                    f.aiManuallyOverridden = true;
+                    if (typeof queueAiLearnForItem === 'function') {
+                        queueAiLearnForItem(f, 'manual-bulk-edit');
+                    }
+                }
                 if (kommentar) f.kommentar = kommentar;
                 if (datum) f.datum = datum;
             });
@@ -595,6 +612,11 @@ DOM.fileListContainer.addEventListener('dragend', (e) => {
     state.dragReorderSrcId = null;
 });
 
+// Defensive fallback: some browsers can lose per-element dragend when DOM re-renders mid-drag.
+document.addEventListener('dragend', () => {
+    state.dragReorderSrcId = null;
+}, true);
+
 DOM.fileListContainer.addEventListener('dragover', (e) => {
     e.preventDefault();
     // External file drag: per-section drop-target highlight
@@ -642,9 +664,10 @@ DOM.fileListContainer.addEventListener('drop', (e) => {
         const isRealCategory = groupKey && groupKey !== 'Unkategorisiert' &&
             (!state.groupBy || state.groupBy === 'kategorie');
         const target = isRealCategory
-            ? { oberkategorie: groupKey, unterkategorie: '' }
+            ? { oberkategorie: groupKey, unterkategorie: '', lockCategory: true }
             : { oberkategorie: '', unterkategorie: '' };
         handleDroppedFiles(e.dataTransfer.files, target);
+        state.dragReorderSrcId = null;
         return;
     }
 
@@ -658,6 +681,7 @@ DOM.fileListContainer.addEventListener('drop', (e) => {
     if (srcIdx === -1 || dstIdx === -1) return;
     const [moved] = state.files.splice(srcIdx, 1);
     state.files.splice(dstIdx, 0, moved);
+    state.dragReorderSrcId = null;
     renderList();
 });
 
@@ -716,6 +740,23 @@ const _handleEditBlur = _debounce((target) => {
     if (item && item[field] !== val) {
         const oldValue = item[field];
         item[field] = val;
+        if (field === 'kommentar') {
+            let learnSource = 'manual-list-edit';
+            if (item.aiCommentStatus === 'auto') {
+                item.aiCommentManuallyOverridden = true;
+                learnSource = 'manual-comment-edit';
+            }
+            item.aiCommentStatus = 'manual';
+            if (typeof queueAiLearnForItem === 'function') {
+                queueAiLearnForItem(item, learnSource);
+            }
+        }
+        if (field === 'unterkategorie') {
+            item.aiManuallyOverridden = true;
+            if (typeof queueAiLearnForItem === 'function') {
+                queueAiLearnForItem(item, 'manual-list-edit');
+            }
+        }
         pushUndo({ type: 'edit', id: item.id, field, oldValue });
         if (field === 'standort') {
             const normalized = val ? val.padStart(4, '0') : '';
